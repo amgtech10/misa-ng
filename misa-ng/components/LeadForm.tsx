@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 
 export type Field = {
   n: string;
@@ -31,6 +31,8 @@ export default function LeadForm({
   cta = "Submit",
   extra = {},
 }: LeadFormProps) {
+  const formId = useId();
+
   const [step, setStep] = useState(0);
   const [data, setData] = useState<FormData>({});
   const [status, setStatus] = useState<SubmitState>("idle");
@@ -44,7 +46,7 @@ export default function LeadForm({
     (
       e: React.ChangeEvent<
         HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-      >
+      )
     ) => {
       setData((current) => ({
         ...current,
@@ -72,7 +74,9 @@ export default function LeadForm({
   function handleNext() {
     if (!validateCurrentStep()) {
       setStatus("err");
-      setMessage("Please complete the required fields before continuing.");
+      setMessage(
+        "Please complete the required fields before continuing."
+      );
       return;
     }
 
@@ -87,12 +91,16 @@ export default function LeadForm({
     setStep((current) => Math.max(0, current - 1));
   }
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    e: React.FormEvent<HTMLFormElement>
+  ) {
     e.preventDefault();
 
     if (!validateCurrentStep()) {
       setStatus("err");
-      setMessage("Please complete the required fields before submitting.");
+      setMessage(
+        "Please complete the required fields before submitting."
+      );
       return;
     }
 
@@ -177,8 +185,9 @@ export default function LeadForm({
           </h3>
 
           <p className="mt-5 max-w-lg text-sm leading-7 text-white/45">
-            Your enquiry has been received by MISA NG. A member of our advisory
-            team will review your request and contact you shortly.
+            Your enquiry has been received by MISA NG. A member of our
+            advisory team will review your request and contact you
+            shortly.
           </p>
 
           <div className="mt-8 h-px w-full bg-white/[0.08]" />
@@ -195,7 +204,11 @@ export default function LeadForm({
 
   return (
     <form
-      onSubmit={lastStep ? handleSubmit : (e) => e.preventDefault()}
+      onSubmit={
+        lastStep
+          ? handleSubmit
+          : (e) => e.preventDefault()
+      }
       className="relative overflow-hidden border border-white/[0.08] bg-[#0c0f14]/95 p-6 shadow-2xl shadow-black/20 backdrop-blur-xl sm:p-8"
     >
       {/* Decorative glow */}
@@ -244,8 +257,11 @@ export default function LeadForm({
 
             <div className="mt-2 flex justify-between text-[8px] uppercase tracking-[0.16em] text-white/20">
               <span>Enquiry</span>
+
               <span>
-                {lastStep ? "Review & submit" : "Your details"}
+                {lastStep
+                  ? "Review & submit"
+                  : "Your details"}
               </span>
             </div>
           </div>
@@ -254,24 +270,39 @@ export default function LeadForm({
         {/* Fields */}
         <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-5">
           {currentFields.map((field) => {
-            const id = `lead-${field.n}`;
+            /*
+             * useId() gives this form a stable, SSR-safe
+             * unique prefix. This prevents duplicate IDs
+             * when multiple LeadForm components exist.
+             */
+            const id = `${formId}-lead-${field.n}`;
+
             const value = data[field.n] ?? "";
 
             return (
               <label
                 key={field.n}
                 htmlFor={id}
-                className={field.h ? "col-span-2 sm:col-span-1" : "col-span-2"}
+                className={
+                  field.h
+                    ? "col-span-2 sm:col-span-1"
+                    : "col-span-2"
+                }
               >
                 <span className="mb-2 block text-[9px] uppercase tracking-[0.2em] text-white/40">
                   {field.l}
+
                   {field.r && (
-                    <span className="ml-1 text-brand" aria-hidden="true">
+                    <span
+                      className="ml-1 text-brand"
+                      aria-hidden="true"
+                    >
                       *
                     </span>
                   )}
                 </span>
 
+                {/* SELECT */}
                 {field.o ? (
                   <div className="relative">
                     <select
@@ -282,7 +313,10 @@ export default function LeadForm({
                       onChange={updateField(field.n)}
                       className="min-h-[50px] w-full appearance-none border border-white/[0.1] bg-white/[0.025] px-4 pr-10 text-sm text-white outline-none transition duration-300 focus:border-brand/60 focus:bg-white/[0.04] focus:ring-1 focus:ring-brand/20"
                     >
-                      <option value="" className="bg-[#0c0f14]">
+                      <option
+                        value=""
+                        className="bg-[#0c0f14]"
+                      >
                         {field.p || "Select an option"}
                       </option>
 
@@ -313,6 +347,7 @@ export default function LeadForm({
                     </svg>
                   </div>
                 ) : field.t === "area" ? (
+                  /* TEXTAREA */
                   <textarea
                     id={id}
                     name={field.n}
@@ -324,6 +359,7 @@ export default function LeadForm({
                     className="min-h-[110px] w-full resize-none border border-white/[0.1] bg-white/[0.025] px-4 py-3 text-sm text-white outline-none placeholder:text-white/20 transition duration-300 focus:border-brand/60 focus:bg-white/[0.04] focus:ring-1 focus:ring-brand/20"
                   />
                 ) : (
+                  /* INPUT */
                   <input
                     id={id}
                     name={field.n}
@@ -346,7 +382,12 @@ export default function LeadForm({
             className="mt-5 flex items-start gap-3 border border-red-400/15 bg-red-400/[0.04] px-4 py-3"
             role="alert"
           >
-            <span className="mt-0.5 text-red-400">!</span>
+            <span
+              className="mt-0.5 text-red-400"
+              aria-hidden="true"
+            >
+              !
+            </span>
 
             <p className="text-xs leading-5 text-red-300/80">
               {message}
@@ -367,6 +408,7 @@ export default function LeadForm({
                 <span className="transition-transform duration-300 group-hover:-translate-x-1">
                   ←
                 </span>
+
                 Back
               </button>
             )}
@@ -406,8 +448,8 @@ export default function LeadForm({
 
         {/* Footer note */}
         <p className="mt-6 text-[8px] leading-5 tracking-[0.08em] text-white/20">
-          Your information is treated confidentially and used only to respond
-          to this enquiry.
+          Your information is treated confidentially and used only
+          to respond to this enquiry.
         </p>
       </div>
     </form>

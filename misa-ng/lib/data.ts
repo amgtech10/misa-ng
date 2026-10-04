@@ -110,7 +110,7 @@ export const listings: Listing[] = [
       "Spacious industrial warehouse units located in Ikeja.",
     beds: "N/A",
     image:
-      "https://images.unsplash.com/photo-1586528116493-da8b0a1c2f9d?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1586528116495-da8b0a1c2f9d?auto=format&fit=crop&w=1600&q=85",
   },
 ];
 

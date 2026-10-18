@@ -1,5 +1,5 @@
 import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
+import CinematicHero from "@/components/CinematicHero";
 import Properties from "@/components/Properties";
 import LeadModal from "@/components/LeadModal";
 import LeadButton from "@/components/LeadButton";
@@ -42,7 +42,7 @@ export default function Home() {
       {/* =========================================================
           HERO
       ========================================================= */}
-      <Hero />
+      <CinematicHero />
 
       {/* =========================================================
           BRAND STATEMENT / TRUST STRIP

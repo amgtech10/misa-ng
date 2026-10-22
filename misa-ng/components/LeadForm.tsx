@@ -41,13 +41,8 @@ export default function LeadForm({
   const lastStep = step === steps.length - 1;
   const currentFields = steps[step] ?? [];
 
-  const updateField =
-    (name: string) =>
-    (
-      e: React.ChangeEvent<
-        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-      )
-    ) => {
+  const updateField = (name: string) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       setData((current) => ({
         ...current,
         [name]: e.target.value,

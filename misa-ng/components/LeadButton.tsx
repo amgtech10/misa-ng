@@ -18,7 +18,7 @@ export default function LeadButton({
     <button
       type="button"
       onClick={() => openLead(type)}
-      className={`group relative inline-flex min-h-[48px] w-auto max-w-full flex-row flex-nowrap items-center justify-center gap-4 overflow-hidden whitespace-nowrap px-5 py-3 text-[9px] font-medium uppercase tracking-[0.18em] transition-all duration-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-ink ${className}`}
+      className={`group relative inline-flex min-h-[48px] w-auto max-w-full flex-row flex-nowrap items-center justify-center gap-1 overflow-hidden whitespace-nowrap px-2 py-2 text-[9px] font-medium uppercase tracking-[0.18em] transition-all duration-500 focus:outline-none border-border-current focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-ink ${className}`}
     >
       {/* Hover effect */}
       <span
@@ -27,14 +27,14 @@ export default function LeadButton({
       />
 
       {/* Button text */}
-      <span className="relative z-10 block shrink-0 whitespace-nowrap">
+      <span className="relative z-10 inline-flex shrink-0 items-center whitespace-nowrap">
         {children}
       </span>
 
       {/* Arrow */}
       <span
         aria-hidden="true"
-        className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center border border-current/20 text-[13px] leading-none transition-all duration-500 group-hover:translate-x-1 group-hover:border-current/40"
+        className="relative z-10 inline-flex h-6 w-6 shrink-0 items-center justify-center text-[20px] leading-none transition-all duration-500 group-hover:translate-x-1"
       >
         →
       </span>

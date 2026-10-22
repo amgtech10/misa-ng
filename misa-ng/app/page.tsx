@@ -197,8 +197,8 @@ export default function Home() {
                 </div>
 
                 <div className="mt-10">
-                  <LeadButton type="Investment pack: Maitama Terraces">
-                    Request investment pack
+                  <LeadButton type="button" className="btn-outline">
+                    Request investment pack 
                   </LeadButton>
                 </div>
 
@@ -554,7 +554,7 @@ export default function Home() {
       ========================================================= */}
       {wa && (
         <a
-          href={`https://wa.me/${wa}?text=${encodeURIComponent(
+          href={`https://wa.me/${+233505171018}?text=${encodeURIComponent(
             "Hello MISA NG, I would like to enquire about a property."
           )}`}
           target="_blank"

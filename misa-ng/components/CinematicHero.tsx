@@ -19,7 +19,7 @@ import {
   useState,
 } from "react";
 import { sendLead } from "@/lib/lead";
-
+import link from "next/link";
 /* -------------------------------------------------------------------------- */
 /* Configuration                                                              */
 /* -------------------------------------------------------------------------- */
@@ -468,6 +468,7 @@ export default function CinematicHero() {
 
   return (
     <MotionConfig reducedMotion="user">
+
       <section
         ref={sectionRef}
         id="top"
@@ -543,66 +544,12 @@ export default function CinematicHero() {
         {/* PAGE CONTENT                                                       */}
         {/* ================================================================== */}
 
-        <div className="relative z-10">
+        <div className="relative mt-12 z-10">
           {/* -------------------------------------------------------------- */}
           {/* HEADER                                                         */}
           {/* -------------------------------------------------------------- */}
 
-          <header className="relative z-20">
-            <motion.div
-              {...fade(0.1)}
-              className="mx-auto flex w-full max-w-[1500px] items-center justify-between gap-3 px-4 pt-5 sm:px-6 sm:pt-7 lg:px-10"
-            >
-              <a
-                href="#top"
-                aria-label="MISA NG home"
-                className="flex min-w-0 items-center gap-3"
-              >
-                <span className="grid h-10 w-10 shrink-0 place-items-center border border-[#FFB52A]/50 bg-black/20 font-serif text-lg text-[#FFB52A]">
-                  M
-                </span>
-
-                <span className="min-w-0">
-                  <span className="block text-[10px] font-semibold tracking-[0.22em] sm:text-xs">
-                    MISA NG LTD
-                  </span>
-
-                  <span className="mt-1 block text-[8px] uppercase tracking-[0.12em] text-white/45 sm:text-[9px] sm:tracking-[0.18em]">
-                    Property · Investment · Advisory
-                  </span>
-                </span>
-              </a>
-
-              <nav
-                aria-label="Main navigation"
-                className="hidden items-center gap-7 text-[10px] uppercase tracking-[0.16em] text-white/60 lg:flex"
-              >
-                {[
-                  ["Properties", "properties"],
-                  ["Developers", "developers"],
-                  ["Intelligence", "news"],
-                ].map(([label, id]) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => goTo(id)}
-                    className="transition-colors duration-300 hover:text-[#FFB52A] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A]"
-                  >
-                    {label}
-                  </button>
-                ))}
-              </nav>
-
-              <button
-                type="button"
-                onClick={() => goTo("properties")}
-                className="min-h-10 shrink-0 border border-white/20 px-3 py-2.5 text-[9px] uppercase tracking-[0.12em] transition hover:border-[#FFB52A] hover:bg-[#FFB52A] hover:text-black focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A] sm:px-5 sm:text-[10px]"
-              >
-                Explore
-              </button>
-            </motion.div>
-          </header>
-
+    
           {/* -------------------------------------------------------------- */}
           {/* HERO GRID                                                      */}
           {/* -------------------------------------------------------------- */}
@@ -626,21 +573,29 @@ export default function CinematicHero() {
                 variants={stagger}
                 initial="hidden"
                 animate="show"
-                className="mt-7 font-serif text-[clamp(2.15rem,8.5vw,5.5rem)] font-dark  uppercase leading-[1.02] tracking-[-0.045em] sm:mt-8 sm:text-[clamp(3rem,6vw,5.5rem)]"
+                className="mt-7 p-2 gap-3  font-serif text-[clamp(2.15rem,8.5vw,5.5rem)] font-dark  uppercase leading-[1.02] tracking-[-0.045em] sm:mt-8 sm:text-[clamp(3rem,6vw,5.5rem)]"
               >
                 <span className="block overflow-hidden">
-                  <motion.span variants={rise} className="block">
+                  <motion.span variants={rise} className="block text-[#FFB52A]">
                     Property
                   </motion.span>
                 </span>
 
                 <span className="block overflow-hidden">
-                  <motion.span variants={rise} className="block">
-                    brokered across
+                  <motion.span variants={rise} className="block text-white/50">
+                    brokered
                   </motion.span>
                 </span>
 
-                <span className="mt-2 block overflow-hidden">
+            <span className="block overflow-hidden">
+              <motion.span variants={rise} className="block text-zinc-200"
+>
+             Across
+              </motion.span>
+            
+            </span>
+
+                <span className="mt-4 block overflow-hidden">
                   <motion.span variants={rise} className="block">
                     <span className="sr-only">
                       Nigeria: residential, commercial, land and developments.
@@ -1036,9 +991,9 @@ export default function CinematicHero() {
               className="mx-auto max-w-[1500px]"
             >
               <div className="max-w-3xl">
-                <h3 className="mb-5 font-serif max-w-[220px] flex items-center gap-1 text-[1.55rem] leading-[1.05] tracking[-0.02] text-white">
-                  <span className="h-1.5 w-1.5 font-serif rounded-full bg-[#FFB52A]" />
-                  About Us
+                <h3 className="mb-5 font-serif max-w-[220px] flex items-center gap-2 text-[2rem] tracking[-0.02] font-dark text-white">
+                  <span className="h-3 w-3 font-serif rounded-full bg-[#FFB52A]" />
+                  MISA<span className="text-[#ffb52a]">NG</span>
                 </h3>
 
                 <p className="font-serif text-xl font-light leading-relaxed text-white/90 sm:text-2xl md:text-3xl">
@@ -1053,10 +1008,9 @@ export default function CinematicHero() {
                 <button
                   type="button"
                   onClick={() => goTo("invest")}
-                  className="group mt-8 inline-flex items-center gap-4 text-xs text-white/80 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A]"
+                  className="group mt-8 inline-flex items-center gap-4 text-xs text-white/60 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A]"
                 >
                   Learn more
-
                   <span className="grid h-7 w-7 rotate-45 place-items-center bg-[#ffb25a] text-black transition duration-300 group-hover:scale-110">
                     <svg
                       viewBox="0 0 24 24"

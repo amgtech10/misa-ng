@@ -5,6 +5,7 @@ import LeadModal from "@/components/LeadModal";
 import LeadButton from "@/components/LeadButton";
 import Reveal from "@/components/Reveal";
 import { news } from "@/lib/data";
+import Link from "next/link";
 
 const pillars = [
   {
@@ -82,7 +83,7 @@ export default function Home() {
           FEATURED OPPORTUNITY
       ========================================================= */}
       <section
-        id="invest"
+        id="properties"
         className="relative overflow-hidden bg-[#080807]"
       >
         <div className="grid min-h-[760px] lg:grid-cols-[1.05fr_.95fr]">
@@ -197,9 +198,30 @@ export default function Home() {
                 </div>
 
                 <div className="mt-10">
-                  <LeadButton type="button" className="btn-outline">
-                    Request investment pack 
-                  </LeadButton>
+
+                  <Link
+
+  href="/invest"
+
+  className="group inline-flex min-h-[48px] items-center justify-center gap-3 bg-[#FFB52A] px-5 py-3 text-[9px] font-medium uppercase tracking-[0.18em] text-[#080B10] transition duration-300 hover:bg-[#FFD078]"
+
+>
+
+  <span>Explore investment opportunities</span>
+
+  <span
+
+    aria-hidden="true"
+
+    className="text-sm transition-transform duration-300 group-hover:translate-x-1"
+
+  >
+
+    →
+
+  </span>
+  </Link>
+                  
                 </div>
 
                 <p className="mt-5 text-[10px] leading-5 text-black/35">
@@ -277,12 +299,12 @@ export default function Home() {
                 </p>
               </div>
 
-              <h2 className="mt-7 max-w-4xl font-serif text-[clamp(3rem,6vw,6rem)] leading-[0.86] tracking-[-0.045em]">
+              <h2 className="mt-7 max-w-4xl text-zinc-400 font-serif text-[clamp(3rem,6vw,6rem)] leading-[0.86] tracking-[-0.045em]">
                 Put your
                 <br />
                 development
                 <br />
-                <span className="italic text-white/35">in the right hands.</span>
+                <span className="italic text-amber-500">in the right hands.</span>
               </h2>
 
               <p className="mt-8 max-w-xl text-[15px] leading-8 text-white/45">
@@ -291,7 +313,7 @@ export default function Home() {
                 access to serious buyers and investors.
               </p>
 
-              <div className="mt-10 flex flex-wrap gap-3 text-[9px] uppercase tracking-[0.2em] text-white/35">
+              <div className="mt-10 flex flex-wrap gap-3 text-[9px] uppercase tracking-[0.2em] text-white">
                 <span className="border border-white/10 px-4 py-2.5">
                   Project presentation
                 </span>
@@ -308,23 +330,13 @@ export default function Home() {
           </Reveal>
 
           <Reveal delay={150}>
-            <div className="relative border border-white/10 bg-white/[0.025] p-7 shadow-2xl shadow-black/20 backdrop-blur-sm sm:p-10">
-              {/* Card number */}
-              <div className="flex items-center justify-between">
-                <span className="text-[9px] uppercase tracking-[0.25em] text-white/25">
-                  MISA / 02
-                </span>
+            <div className="relative border border-white/10 bg-white/[0.025] shadow-2xl shadow-black/20 backdrop-blur-sm sm:p-4">
 
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-brand">
-                  ↗
-                </span>
-              </div>
-
-              <h3 className="mt-16 max-w-md font-serif text-3xl leading-tight sm:text-4xl">
-                A more intelligent route to qualified enquiries.
+              <h3 className="pt-10 p-7 max-w-md font-serif text-3xl leading-tight sm:text-4xl">
+                Steps to qualified enquiries.
               </h3>
 
-              <div className="mt-10 border-t border-white/10 pt-8">
+              <div className=" border-white/10 justiy items-center p-8">
                 {[
                   [
                     "01",
@@ -363,13 +375,13 @@ export default function Home() {
                 ))}
               </div>
 
-              <div className="mt-9">
+              <div className="mt-2 px-8">
                 <LeadButton type="Developer onboarding">
-                  Start developer onboarding
+                  Start onboarding
                 </LeadButton>
               </div>
 
-              <p className="mt-5 text-[10px] leading-5 text-white/25">
+              <p className="mt-5 text-[10px] leading-0 p-5 text-white/25">
                 Commission is payable upon a completed sale, subject to agreed
                 terms.
               </p>
@@ -383,7 +395,7 @@ export default function Home() {
       ========================================================= */}
       <section
         id="newsfeed"
-        className="relative bg-[#f2eee6] px-6 py-28 text-[#111] sm:px-8 lg:px-10"
+        className="relative bg-white px-6 py-28 text-[#111] sm:px-8 lg:px-10"
       >
         <div className="mx-auto max-w-[1500px]">
           <Reveal>
@@ -400,16 +412,15 @@ export default function Home() {
                 <h2 className="mt-6 font-serif text-[clamp(3rem,6vw,5.7rem)] leading-[0.88] tracking-[-0.045em]">
                   Market notes.
                   <br />
-                  <span className="text-black/30">Better decisions.</span>
+                  <span className="text-zinc-400">Better decisions.</span>
                 </h2>
               </div>
 
               <div>
                 <LeadButton
-                  type="Newsfeed subscription"
-                  className="btn-line"
-                >
-                  Subscribe to newsfeed
+                  className="Newsfeed text-[#ffb52a] bg-black/90 border-radius-100"
+                  type="Newsfeed subscription">
+                     Subscribe to newsfeed
                 </LeadButton>
               </div>
             </div>
@@ -479,13 +490,13 @@ export default function Home() {
 
               <div className="mt-10">
                 <LeadButton type="Contact request">
-                  Start a conversation
+                  Contact Us
                 </LeadButton>
               </div>
             </div>
 
             <nav className="grid content-start gap-4">
-              <p className="mb-3 text-[9px] uppercase tracking-[0.28em] text-white/25">
+              <p className="mb-3 text-[9px] uppercase tracking-[0.28em] text-white">
                 Explore
               </p>
 
@@ -496,12 +507,12 @@ export default function Home() {
                 Properties
               </a>
 
-              <a
-                href="#invest"
+              <Link
+                href="/invest"
                 className="text-[13px] text-white/45 transition hover:text-brand"
               >
                 Investments
-              </a>
+              </Link>
 
               <a
                 href="#newsfeed"
@@ -512,7 +523,7 @@ export default function Home() {
             </nav>
 
             <nav className="grid content-start gap-4">
-              <p className="mb-3 text-[9px] uppercase tracking-[0.28em] text-white/25">
+              <p className="mb-3 text-[9px] uppercase tracking-[0.28em] text-white">
                 Connect
               </p>
 
@@ -560,7 +571,7 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Chat with MISA NG on WhatsApp"
-          className="group fixed bottom-6 right-6 z-30"
+          className="group fixed bottom-60 right-6 z-30"
         >
           <span className="absolute inset-0 rounded-full bg-profit/30 blur-xl transition duration-500 group-hover:scale-125" />
 

@@ -15,7 +15,7 @@ export default function GemEnquiryButton({
       onClick={() => openLead(enquiryTitle)}
       className="btn btn-brand mt-8 w-fit"
     >
-      Enquire about this gem
+     Make Enquiry
     </button>
   );
 }

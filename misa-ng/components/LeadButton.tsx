@@ -18,23 +18,61 @@ export default function LeadButton({
     <button
       type="button"
       onClick={() => openLead(type)}
-      className={`group relative inline-flex min-h-[48px] w-auto max-w-full flex-row flex-nowrap items-center justify-center gap- overflow-hidden whitespace-nowrap px-5 py-3 text-[9px] font-medium uppercase tracking-[0.18em] transition-all duration-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-ink ${className}`}
+      className={`
+        group relative isolate inline-flex min-h-12
+        w-auto max-w-full shrink-0
+        items-center justify-center gap-3
+        overflow-hidden
+        px-5 py-3
+        text-center text-[10px] font-medium uppercase
+        leading-none tracking-[0.14em]
+        transition-colors duration-300 ease-out
+        active:scale-[0.99]
+        focus-visible:outline-none
+        focus-visible:ring-2
+        focus-visible:ring-brand
+        focus-visible:ring-offset-2
+        focus-visible:ring-offset-ink
+        motion-reduce:transition-none
+        motion-reduce:active:scale-100
+        sm:gap-4 sm:px-6
+        ${className}
+      `}
     >
-      {/* Hover effect */}
+      {/* Restrained hover highlight */}
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -translate-x-full bg-white/10 transition-transform duration-500 ease-out group-hover:translate-x-0"
+        className="
+          pointer-events-none absolute inset-0 -z-10
+          -translate-x-full bg-white/[0.08]
+          transition-transform duration-300 ease-out
+          group-hover:translate-x-0
+          motion-reduce:transition-none
+        "
       />
 
-      {/* Button text */}
-      <span className="relative z-10 inline-flex shrink-0 items-center whitespace-nowrap">
+      {/* Button label */}
+      <span
+        className="
+          relative z-10 min-w-0
+          whitespace-normal break-words
+        "
+      >
         {children}
       </span>
 
-      {/* Arrow */}
+      {/* Decorative directional arrow */}
       <span
         aria-hidden="true"
-        className="relative bottom-0.4 z-10 inline-flex h-6 w-6 shrink-0 items-center justify-center text-[15px] leading-none transition-all duration-500 group-hover:translate-x-1"
+        className="
+          relative z-10 inline-flex h-5 w-5 shrink-0
+          items-center justify-center
+          text-[15px] leading-none
+          transition-transform duration-300 ease-out
+          group-hover:translate-x-1
+          motion-reduce:transition-none
+          motion-reduce:group-hover:translate-x-0
+        "
       >
         →
       </span>

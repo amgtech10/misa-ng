@@ -19,23 +19,38 @@ import {
   useState,
 } from "react";
 import { sendLead } from "@/lib/lead";
-import link from "next/link";
+
 /* -------------------------------------------------------------------------- */
-/* Configuration                                                              */
+/* Brand configuration                                                        */
 /* -------------------------------------------------------------------------- */
 
-const BRAND = "#FFB52A";
+const BRAND = "#F59A16";
+const GOLD = "#FFB52A";
+const DEEP_ORANGE = "#A85F08";
 const NAVY = "#0A0F17";
-const INK = "#080807";
+const PANEL = "#0D121B";
+const BORDER = "#252D3A";
+const WHITE = "#F5F5F5";
+const SOFT_GRAY = "#A7AFBF";
+const MUTED_GRAY = "#737B89";
+const SUCCESS = "#32D583";
 
 const interests = [
   "Buy a property",
   "List a property",
   "Invest",
   "Onboard as a developer",
-];
+] as const;
 
 type Interest = (typeof interests)[number];
+
+type LeadData = {
+  name: string;
+  phone: string;
+  email: string;
+  interest: Interest;
+  note: string;
+};
 
 type Scene = {
   word: string;
@@ -44,14 +59,6 @@ type Scene = {
   lit: number;
   image?: string;
   imagePosition?: string;
-};
-
-type LeadData = {
-  name: string;
-  phone: string;
-  email: string;
-  interest: Interest;
-  note: string;
 };
 
 const initialLead: LeadData = {
@@ -80,7 +87,7 @@ const scenes: Scene[] = [
   },
   {
     word: "Land",
-    sky: "linear-gradient(180deg,#0A0F17 0%,#8a5a10 60%,#F59A16 100%)",
+    sky: "linear-gradient(180deg,#0A0F17 0%,#A85F08 60%,#F59A16 100%)",
     heights: [14, 22, 12, 26, 16, 20],
     lit: 0,
   },
@@ -98,18 +105,18 @@ const stagger = {
   hidden: {},
   show: {
     transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.2,
+      staggerChildren: 0.1,
+      delayChildren: 0.12,
     },
   },
 };
 
 const rise = {
-  hidden: { y: "110%" },
+  hidden: { y: "105%" },
   show: {
     y: 0,
     transition: {
-      duration: 0.9,
+      duration: 0.8,
       ease,
     },
   },
@@ -118,14 +125,14 @@ const rise = {
 const fade = (delay: number) => ({
   initial: {
     opacity: 0,
-    y: 20,
+    y: 16,
   },
   animate: {
     opacity: 1,
     y: 0,
   },
   transition: {
-    duration: 0.75,
+    duration: 0.65,
     delay,
     ease,
   },
@@ -142,10 +149,11 @@ function Art({ scene, id }: { scene: Scene; id: string }) {
       viewBox="0 0 1200 800"
       preserveAspectRatio="xMidYMax slice"
       aria-hidden="true"
+      focusable="false"
     >
       <defs>
         <pattern
-          id={id}
+          id={`${id}-windows`}
           width="12"
           height="16"
           patternUnits="userSpaceOnUse"
@@ -155,14 +163,20 @@ function Art({ scene, id }: { scene: Scene; id: string }) {
             y="4"
             width="5"
             height="7"
-            fill={BRAND}
+            fill={GOLD}
             opacity={scene.lit}
           />
         </pattern>
 
-        <linearGradient id={`${id}-fade`} x1="0" y1="0" x2="0" y2="1">
+        <linearGradient
+          id={`${id}-fade`}
+          x1="0"
+          y1="0"
+          x2="0"
+          y2="1"
+        >
           <stop offset="0%" stopColor="#050505" stopOpacity="0" />
-          <stop offset="100%" stopColor="#050505" stopOpacity=".8" />
+          <stop offset="100%" stopColor="#050505" stopOpacity=".88" />
         </linearGradient>
       </defs>
 
@@ -173,7 +187,6 @@ function Art({ scene, id }: { scene: Scene; id: string }) {
           scene.heights[index % scene.heights.length] *
           (0.7 + ((index * 37) % 10) / 16);
 
-        const width = 46;
         const x = index * 50;
 
         return (
@@ -181,18 +194,18 @@ function Art({ scene, id }: { scene: Scene; id: string }) {
             <rect
               x={x}
               y={800 - height}
-              width={width}
+              width="46"
               height={height}
               fill="#050505"
-              opacity=".9"
+              opacity=".94"
             />
 
             <rect
               x={x}
               y={800 - height}
-              width={width}
+              width="46"
               height={height}
-              fill={`url(#${id})`}
+              fill={`url(#${id}-windows)`}
             />
           </g>
         );
@@ -208,8 +221,14 @@ function Art({ scene, id }: { scene: Scene; id: string }) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Reusable form field                                                        */
+/* Shared input styles                                                        */
 /* -------------------------------------------------------------------------- */
+
+const inputClasses =
+  "min-h-12 w-full rounded-sm border border-[#252D3A] bg-[#050505]/75 px-4 py-3 text-base text-[#F5F5F5] outline-none transition-colors duration-200 placeholder:text-[#737B89] hover:border-[#737B89] focus:border-[#FFB52A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFB52A] sm:text-sm";
+
+const labelClasses =
+  "mb-2 block text-[10px] font-medium uppercase tracking-[0.16em] text-[#A7AFBF]";
 
 type FieldProps = {
   id: string;
@@ -220,6 +239,7 @@ type FieldProps = {
   type?: string;
   autoComplete?: string;
   required?: boolean;
+  inputRef?: React.Ref<HTMLInputElement>;
 };
 
 function Field({
@@ -231,13 +251,11 @@ function Field({
   type = "text",
   autoComplete,
   required = false,
+  inputRef,
 }: FieldProps) {
   return (
     <div className="min-w-0">
-      <label
-        htmlFor={id}
-        className="mb-2 block text-[10px] font-medium uppercase tracking-[0.16em] text-white/50"
-      >
+      <label htmlFor={id} className={labelClasses}>
         {label}
         {required && (
           <span className="ml-1 text-[#FFB52A]" aria-hidden="true">
@@ -247,6 +265,7 @@ function Field({
       </label>
 
       <input
+        ref={inputRef}
         id={id}
         name={id}
         type={type}
@@ -256,7 +275,7 @@ function Field({
         autoComplete={autoComplete}
         required={required}
         aria-required={required}
-        className="min-h-12 w-full rounded-none border border-white/10 bg-white/[0.035] px-4 py-3 text-base text-white outline-none transition-colors duration-300 placeholder:text-white/25 hover:border-white/20 focus:border-[#FFB52A] focus:bg-white/[0.055] focus-visible:ring-1 focus-visible:ring-[#FFB52A]/40 sm:text-sm"
+        className={inputClasses}
       />
     </div>
   );
@@ -266,39 +285,51 @@ function Field({
 /* Success state                                                              */
 /* -------------------------------------------------------------------------- */
 
-function SuccessState({ onReset }: { onReset: () => void }) {
+function SuccessState({
+  onReset,
+}: {
+  onReset: () => void;
+}) {
+  const reducedMotion = useReducedMotion();
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={reducedMotion ? false : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease }}
+      transition={{
+        duration: reducedMotion ? 0 : 0.4,
+        ease,
+      }}
       className="py-5 sm:py-8"
       role="status"
       aria-live="polite"
     >
-      <div className="flex h-12 w-12 items-center justify-center border border-emerald-400/30 bg-emerald-400/10 text-xl text-emerald-300">
+      <div
+        className="flex h-12 w-12 items-center justify-center border border-[#32D583]/35 bg-[#32D583]/10 text-xl text-[#32D583]"
+        aria-hidden="true"
+      >
         ✓
       </div>
 
-      <p className="mt-7 text-[10px] uppercase tracking-[0.24em] text-[#FFB52A]">
+      <p className="mt-7 text-[10px] uppercase tracking-[0.22em] text-[#FFB52A]">
         Enquiry received
       </p>
 
-      <h2 className="mt-3 font-serif text-3xl font-light leading-tight">
+      <h2 className="mt-3 font-serif text-3xl font-normal leading-tight text-[#F5F5F5]">
         Your property brief
         <br />
         is with us.
       </h2>
 
-      <p className="mt-4 max-w-sm text-sm leading-7 text-white/55">
-        Thank you for contacting MISA NG. Our team will review your
-        requirements and follow up regarding your enquiry.
+      <p className="mt-4 max-w-sm text-sm leading-7 text-[#A7AFBF]">
+        Thank you for contacting MISA NG. Our team will review
+        your requirements and follow up regarding your enquiry.
       </p>
 
       <button
         type="button"
         onClick={onReset}
-        className="mt-8 text-[10px] uppercase tracking-[0.16em] text-[#FFB52A] underline-offset-4 transition hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A]"
+        className="mt-8 min-h-11 text-[10px] uppercase tracking-[0.16em] text-[#FFB52A] underline-offset-4 transition hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A]"
       >
         Submit another enquiry
       </button>
@@ -321,7 +352,16 @@ export default function CinematicHero() {
 
   const sectionRef = useRef<HTMLElement>(null);
   const categoryRefs = useRef<(HTMLSpanElement | null)[]>([]);
+
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const interestInputRef = useRef<HTMLSelectElement>(null);
+  const noteInputRef = useRef<HTMLTextAreaElement>(null);
+
+  const previousStepRef = useRef(step);
+
   const formHeadingId = useId();
+  const formMessageId = useId();
 
   const prefersReducedMotion = useReducedMotion();
 
@@ -333,11 +373,11 @@ export default function CinematicHero() {
   const backgroundScale = useTransform(
     scrollYProgress,
     [0, 0.4],
-    [1, 1.1],
+    [1, 1.06],
   );
 
   /* ------------------------------------------------------------------------ */
-  /* Scene transitions                                                        */
+  /* Rotate scenes, but respect reduced-motion preferences                   */
   /* ------------------------------------------------------------------------ */
 
   useEffect(() => {
@@ -345,27 +385,29 @@ export default function CinematicHero() {
 
     const interval = window.setInterval(() => {
       setSceneIndex((current) => (current + 1) % scenes.length);
-    }, 6000);
+    }, 7000);
 
     return () => window.clearInterval(interval);
   }, [prefersReducedMotion]);
 
   /* ------------------------------------------------------------------------ */
-  /* Measure category positions                                               */
+  /* Keep the category strip aligned when fonts or viewport change            */
   /* ------------------------------------------------------------------------ */
 
   useEffect(() => {
+    let cancelled = false;
+
     const measure = () => {
-      setCategoryOffset(categoryRefs.current[sceneIndex]?.offsetLeft ?? 0);
+      if (cancelled) return;
+
+      setCategoryOffset(
+        categoryRefs.current[sceneIndex]?.offsetLeft ?? 0,
+      );
     };
 
     measure();
 
-    let cancelled = false;
-
-    document.fonts?.ready.then(() => {
-      if (!cancelled) measure();
-    });
+    document.fonts?.ready.then(measure);
 
     window.addEventListener("resize", measure);
 
@@ -376,50 +418,85 @@ export default function CinematicHero() {
   }, [sceneIndex]);
 
   /* ------------------------------------------------------------------------ */
+  /* Focus the new form step only after the visitor changes steps              */
+  /* ------------------------------------------------------------------------ */
+
+  useEffect(() => {
+    if (previousStepRef.current === step) return;
+
+    previousStepRef.current = step;
+
+    const timer = window.setTimeout(() => {
+      if (step === 1) {
+        nameInputRef.current?.focus({ preventScroll: true });
+      } else if (step === 2) {
+        interestInputRef.current?.focus({ preventScroll: true });
+      } else if (step === 3) {
+        noteInputRef.current?.focus({ preventScroll: true });
+      }
+    }, 80);
+
+    return () => window.clearTimeout(timer);
+  }, [step]);
+
+  /* ------------------------------------------------------------------------ */
   /* Form helpers                                                             */
   /* ------------------------------------------------------------------------ */
 
   const updateField = useCallback(
-    (key: keyof LeadData) =>
-      (
-        event: ChangeEvent<
-          HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-        >,
-      ) => {
-        setData((previous) => ({
-          ...previous,
-          [key]: event.target.value,
-        }));
+    (
+      key: keyof LeadData,
+    ) => (
+      event: ChangeEvent<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >,
+    ) => {
+      setData((previous) => ({
+        ...previous,
+        [key]: event.target.value,
+      }));
 
-        if (message) setMessage("");
-      },
+      if (message) setMessage("");
+    },
     [message],
   );
 
   const goTo = useCallback((id: string) => {
-    document.getElementById(id)?.scrollIntoView({
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "auto"
-        : "smooth",
+    const target = document.getElementById(id);
+
+    if (!target) return;
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    target.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
       block: "start",
     });
   }, []);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault();
 
     if (isSubmitting) return;
 
     setMessage("");
 
+    /* Step 1: validate contact information. */
+
     if (step === 1) {
       if (!data.name.trim()) {
         setMessage("Please enter your full name.");
+        nameInputRef.current?.focus();
         return;
       }
 
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
         setMessage("Please enter a valid email address.");
+        emailInputRef.current?.focus();
         return;
       }
 
@@ -427,13 +504,16 @@ export default function CinematicHero() {
       return;
     }
 
+    /* Step 2: capture the visitor's interest. */
+
     if (step === 2) {
       setStep(3);
       return;
     }
 
+    /* Step 3: submit through the existing lead API. */
+
     setIsSubmitting(true);
-    setMessage("");
 
     try {
       await sendLead({
@@ -459,28 +539,33 @@ export default function CinematicHero() {
 
   const resetForm = () => {
     setData(initialLead);
-    setStep(1);
     setMessage("");
     setIsSubmitting(false);
+    setStep(1);
   };
 
   const currentScene = scenes[sceneIndex];
 
   return (
     <MotionConfig reducedMotion="user">
-
       <section
         ref={sectionRef}
         id="top"
-        className="relative isolate overflow-clip bg-[#080807] text-white selection:bg-[#FFB52A] selection:text-black"
+        aria-labelledby="misa-hero-title"
+        className="relative isolate overflow-clip bg-[#050505] text-[#F5F5F5] selection:bg-[#FFB52A] selection:text-[#050505]"
       >
         {/* ================================================================== */}
         {/* CINEMATIC BACKGROUND                                               */}
         {/* ================================================================== */}
 
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[100svh] min-h-[620px] overflow-hidden">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-[100svh] min-h-[620px] overflow-hidden"
+          aria-hidden="true"
+        >
           <motion.div
-            style={{ scale: prefersReducedMotion ? 1 : backgroundScale }}
+            style={{
+              scale: prefersReducedMotion ? 1 : backgroundScale,
+            }}
             className="absolute inset-0"
           >
             <AnimatePresence initial={false} mode="sync">
@@ -493,8 +578,8 @@ export default function CinematicHero() {
                     ? { opacity: 0 }
                     : {
                         opacity: 0,
-                        scale: 1.08,
-                        filter: "blur(8px)",
+                        scale: 1.035,
+                        filter: "blur(5px)",
                       }
                 }
                 animate={{
@@ -504,7 +589,7 @@ export default function CinematicHero() {
                 }}
                 exit={{ opacity: 0 }}
                 transition={{
-                  duration: prefersReducedMotion ? 0.15 : 1.4,
+                  duration: prefersReducedMotion ? 0 : 1.15,
                   ease,
                 }}
               >
@@ -517,7 +602,8 @@ export default function CinematicHero() {
                     sizes="100vw"
                     className="object-cover"
                     style={{
-                      objectPosition: currentScene.imagePosition ?? "center",
+                      objectPosition:
+                        currentScene.imagePosition ?? "center",
                     }}
                   />
                 ) : (
@@ -530,75 +616,76 @@ export default function CinematicHero() {
             </AnimatePresence>
           </motion.div>
 
-          {/* Image contrast */}
-          <div className="absolute inset-0 bg-black/45" />
+          {/* Contrast layers keep the content legible over every scene. */}
 
-          <div className="absolute inset-0 bg-gradient-to-r from-[#080807] via-[#080807]/75 to-[#080807]/20" />
+          <div className="absolute inset-0 bg-[#050505]/45" />
 
-          <div className="absolute inset-0 bg-gradient-to-b from-[#080807]/30 via-transparent to-[#080807]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#050505]/95 via-[#050505]/75 to-[#050505]/25" />
 
-          <div className="absolute -left-40 top-1/3 h-[400px] w-[400px] rounded-full bg-[#D69A3A]/10 blur-[140px] sm:h-[500px] sm:w-[500px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/30 via-transparent to-[#050505]" />
+
+          <div className="absolute -left-40 top-1/3 h-[400px] w-[400px] rounded-full bg-[#A85F08]/10 blur-[140px] sm:h-[500px] sm:w-[500px]" />
         </div>
 
         {/* ================================================================== */}
-        {/* PAGE CONTENT                                                       */}
+        {/* HERO CONTENT                                                       */}
         {/* ================================================================== */}
 
-        <div className="relative mt-12 z-10">
-          {/* -------------------------------------------------------------- */}
-          {/* HEADER                                                         */}
-          {/* -------------------------------------------------------------- */}
-
-    
-          {/* -------------------------------------------------------------- */}
-          {/* HERO GRID                                                      */}
-          {/* -------------------------------------------------------------- */}
-
-          <div className="mx-auto grid w-full max-w-[1500px] content-center items-center gap-12 px-4 pb-14 pt-16 sm:gap-14 sm:px-6 sm:pb-20 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16 lg:px-10 lg:py-20">
+        <div className="relative z-10 pt-8 sm:pt-12">
+          <div className="mx-auto grid w-full max-w-[1500px] content-center items-center gap-12 px-5 pb-14 pt-12 sm:gap-14 sm:px-8 sm:pb-20 sm:pt-16 lg:grid-cols-[1.12fr_0.88fr] lg:gap-16 lg:px-12 lg:py-20 xl:px-16">
             {/* LEFT: BRAND MESSAGE */}
 
-            <div className="min-w-0 max-w-[850px]">
+            <div className="min-w-0 max-w-[800px]">
               <motion.div
-                {...fade(0.15)}
+                {...fade(0.1)}
                 className="flex items-center gap-3 sm:gap-4"
               >
                 <span className="h-px w-8 shrink-0 bg-[#FFB52A] sm:w-12" />
 
-                <span className="text-[9px] uppercase tracking-[0.2em] text-[#FFB52A] sm:text-[10px] sm:tracking-[0.3em]">
+                <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-[#FFB52A] sm:text-[10px] sm:tracking-[0.28em]">
                   Nigerian property advisory
                 </span>
               </motion.div>
 
               <motion.h1
+                id="misa-hero-title"
                 variants={stagger}
                 initial="hidden"
                 animate="show"
-                className="mt-7 p-2 gap-3  font-serif text-[clamp(2.15rem,8.5vw,5.5rem)] font-dark  uppercase leading-[1.02] tracking-[-0.045em] sm:mt-8 sm:text-[clamp(3rem,6vw,5.5rem)]"
+                className="mt-7 font-serif text-[clamp(2.6rem,9.3vw,5.8rem)] font-normal uppercase leading-[0.98] tracking-[-0.045em] sm:mt-8 sm:text-[clamp(3.5rem,6vw,5.8rem)]"
               >
-                <span className="block overflow-hidden">
-                  <motion.span variants={rise} className="block text-[#FFB52A]">
+                <span className="block overflow-hidden pb-1">
+                  <motion.span
+                    variants={rise}
+                    className="block text-[#FFB52A]"
+                  >
                     Property
                   </motion.span>
                 </span>
 
-                <span className="block overflow-hidden">
-                  <motion.span variants={rise} className="block text-white/50">
+                <span className="block overflow-hidden pb-1">
+                  <motion.span
+                    variants={rise}
+                    className="block text-[#F5F5F5]/65"
+                  >
                     brokered
                   </motion.span>
                 </span>
 
-            <span className="block overflow-hidden">
-              <motion.span variants={rise} className="block text-zinc-200"
->
-             Across
-              </motion.span>
-            
-            </span>
+                <span className="block overflow-hidden pb-1">
+                  <motion.span
+                    variants={rise}
+                    className="block text-[#F5F5F5]"
+                  >
+                    across
+                  </motion.span>
+                </span>
 
-                <span className="mt-4 block overflow-hidden">
+                <span className="mt-3 block overflow-hidden pb-2 sm:mt-4">
                   <motion.span variants={rise} className="block">
                     <span className="sr-only">
-                      Nigeria: residential, commercial, land and developments.
+                      Nigeria: residential, commercial, land and
+                      developments.
                     </span>
 
                     <span
@@ -610,10 +697,10 @@ export default function CinematicHero() {
                           x: -categoryOffset,
                         }}
                         transition={{
-                          duration: prefersReducedMotion ? 0 : 0.8,
+                          duration: prefersReducedMotion ? 0 : 0.7,
                           ease,
                         }}
-                        className="flex w-max gap-3 whitespace-nowrap sm:gap-4"
+                        className="flex w-max gap-2.5 whitespace-nowrap sm:gap-3"
                       >
                         {scenes.map((scene, index) => (
                           <span
@@ -621,10 +708,10 @@ export default function CinematicHero() {
                             ref={(element) => {
                               categoryRefs.current[index] = element;
                             }}
-                            className={`border px-2 py-1 text-[0.88em] transition-colors duration-500 sm:px-3 ${
+                            className={`border px-2 py-1.5 text-[0.72em] transition-colors duration-500 sm:px-3 ${
                               index === sceneIndex
-                                ? "border-white/80 text-[#FFB25A]"
-                                : "border-transparent text-white/25"
+                                ? "border-[#FFB52A]/75 text-[#FFB52A]"
+                                : "border-transparent text-[#A7AFBF]/45"
                             }`}
                           >
                             {scene.word}
@@ -637,27 +724,31 @@ export default function CinematicHero() {
               </motion.h1>
 
               <motion.p
-                {...fade(0.65)}
-                className="mt-7 max-w-xl text-sm leading-7 text-white/65 sm:mt-9 sm:text-base sm:leading-8 md:text-lg"
+                {...fade(0.45)}
+                className="mt-6 max-w-xl text-sm leading-7 text-[#A7AFBF] sm:mt-8 sm:text-base sm:leading-8 md:text-lg"
               >
-                A commission-led property agency connecting discerning buyers,
-                investors and developers with opportunities across Nigeria.
+                A commission-led property agency connecting discerning
+                buyers, investors and developers with opportunities
+                across Nigeria.
               </motion.p>
 
               {/* Primary actions */}
 
               <motion.div
-                {...fade(0.8)}
-                className="mt-8 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:flex-wrap sm:mt-9"
+                {...fade(0.6)}
+                className="mt-7 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:flex-wrap sm:mt-9"
               >
                 <button
                   type="button"
                   onClick={() => goTo("properties")}
-                  className="group inline-flex min-h-12 items-center justify-center gap-1 bg-[#FFB52A] px-5 py-4 text-[10px] font-semibold uppercase tracking-[0.15em] text-black transition duration-300 hover:bg-[#FFD078] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A] sm:px-6"
+                  className="group inline-flex min-h-12 items-center justify-center gap-3 bg-[#FFB52A] px-5 py-4 text-[10px] font-semibold uppercase tracking-[0.13em] text-[#050505] transition-colors duration-200 hover:bg-[#F59A16] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A] sm:px-6"
                 >
                   Explore properties
 
-                  <span className="transition-transform duration-300 group-hover:translate-x-1">
+                  <span
+                    aria-hidden="true"
+                    className="transition-transform duration-200 group-hover:translate-x-1"
+                  >
                     →
                   </span>
                 </button>
@@ -665,7 +756,7 @@ export default function CinematicHero() {
                 <button
                   type="button"
                   onClick={() => goTo("developers")}
-                  className="inline-flex min-h-12 items-center justify-center border border-white/20 bg-white/[0.04] px-5 py-4 text-[10px] uppercase tracking-[0.15em] text-white backdrop-blur-md transition duration-300 hover:border-white/50 hover:bg-white/[0.08] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A] sm:px-6"
+                  className="inline-flex min-h-12 items-center justify-center border border-[#252D3A] bg-[#0A0F17]/70 px-5 py-4 text-[10px] uppercase tracking-[0.13em] text-[#F5F5F5] backdrop-blur-md transition-colors duration-200 hover:border-[#737B89] hover:bg-[#0D121B] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A] sm:px-6"
                 >
                   Partner with MISA
                 </button>
@@ -674,8 +765,8 @@ export default function CinematicHero() {
               {/* Trust indicators */}
 
               <motion.div
-                {...fade(1)}
-                className="mt-10 grid max-w-2xl grid-cols-3 border-y border-white/10 py-5 sm:mt-14 sm:py-6 lg:mt-16"
+                {...fade(0.8)}
+                className="mt-9 grid max-w-2xl grid-cols-3 border-y border-[#252D3A] py-5 sm:mt-12 sm:py-6 lg:mt-14"
               >
                 {[
                   ["01", "Trusted agency"],
@@ -688,15 +779,15 @@ export default function CinematicHero() {
                       index === 0
                         ? "pr-2 sm:pr-5"
                         : index === 1
-                          ? "border-l border-white/10 px-2 sm:px-5"
-                          : "border-l border-white/10 pl-2 sm:pl-5"
+                          ? "border-l border-[#252D3A] px-2 sm:px-5"
+                          : "border-l border-[#252D3A] pl-2 sm:pl-5"
                     }
                   >
-                    <p className="font-serif text-xl font-light text-white sm:text-3xl">
+                    <p className="font-serif text-xl font-normal text-[#F5F5F5] sm:text-3xl">
                       {number}
                     </p>
 
-                    <p className="mt-2 text-[8px] uppercase leading-relaxed tracking-[0.1em] text-white/45 sm:text-[9px] sm:tracking-[0.16em]">
+                    <p className="mt-2 text-[8px] uppercase leading-relaxed tracking-[0.08em] text-[#A7AFBF] sm:text-[9px] sm:tracking-[0.14em]">
                       {label}
                     </p>
                   </div>
@@ -707,12 +798,15 @@ export default function CinematicHero() {
             {/* RIGHT: PRIVATE CLIENT ENQUIRY */}
 
             <motion.div
-              {...fade(0.45)}
+              {...fade(0.35)}
               className="flex min-w-0 justify-center lg:justify-end"
             >
               <div className="w-full max-w-[470px]">
-                <div className="relative overflow-hidden border border-white/[0.12] bg-[#0B0B0A]/85 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-2xl sm:p-8 lg:bg-[#0B0B0A]/75">
-                  <div className="absolute left-0 top-0 h-px w-24 bg-[#FFB52A]" />
+                <div className="relative overflow-hidden border border-[#252D3A] bg-[#0D121B]/95 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.42)] backdrop-blur-2xl sm:p-8">
+                  <div
+                    className="absolute left-0 top-0 h-px w-24 bg-[#FFB52A]"
+                    aria-hidden="true"
+                  />
 
                   {step === 4 ? (
                     <SuccessState onReset={resetForm} />
@@ -720,27 +814,27 @@ export default function CinematicHero() {
                     <>
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <p className="text-[9px] uppercase tracking-[0.24em] text-[#FFB52A] sm:text-[10px]">
+                          <p className="text-[9px] font-medium uppercase tracking-[0.22em] text-[#FFB52A] sm:text-[10px]">
                             Private client desk
                           </p>
 
                           <h2
                             id={formHeadingId}
-                            className="mt-3 font-serif text-2xl font-light leading-tight sm:text-3xl"
+                            className="mt-3 font-serif text-2xl font-normal leading-tight text-[#F5F5F5] sm:text-3xl"
                           >
                             Let us find your
                             <br />
                             next property.
                           </h2>
 
-                          <p className="mt-3 max-w-xs text-xs leading-6 text-white/45">
-                            Tell us what you are looking for. We will help you
-                            explore your options.
+                          <p className="mt-3 max-w-xs text-xs leading-6 text-[#A7AFBF]">
+                            Tell us what you are looking for. We will
+                            help you explore your options.
                           </p>
                         </div>
 
                         <span
-                          className="shrink-0 pt-1 font-mono text-[10px] text-white/35"
+                          className="shrink-0 pt-1 font-mono text-[10px] text-[#A7AFBF]"
                           aria-label={`Step ${step} of 3`}
                         >
                           0{step} / 03
@@ -760,10 +854,10 @@ export default function CinematicHero() {
                         {[1, 2, 3].map((number) => (
                           <div
                             key={number}
-                            className={`h-[2px] flex-1 transition-colors duration-500 ${
+                            className={`h-[2px] flex-1 transition-colors duration-300 ${
                               number <= step
                                 ? "bg-[#FFB52A]"
-                                : "bg-white/10"
+                                : "bg-[#252D3A]"
                             }`}
                           />
                         ))}
@@ -773,6 +867,9 @@ export default function CinematicHero() {
                         className="mt-7"
                         onSubmit={handleSubmit}
                         aria-labelledby={formHeadingId}
+                        aria-describedby={
+                          message ? formMessageId : undefined
+                        }
                         noValidate
                       >
                         <AnimatePresence mode="wait" initial={false}>
@@ -781,16 +878,16 @@ export default function CinematicHero() {
                             initial={
                               prefersReducedMotion
                                 ? { opacity: 0 }
-                                : { opacity: 0, x: 18 }
+                                : { opacity: 0, x: 14 }
                             }
                             animate={{ opacity: 1, x: 0 }}
                             exit={
                               prefersReducedMotion
                                 ? { opacity: 0 }
-                                : { opacity: 0, x: -18 }
+                                : { opacity: 0, x: -14 }
                             }
                             transition={{
-                              duration: prefersReducedMotion ? 0.12 : 0.25,
+                              duration: prefersReducedMotion ? 0.1 : 0.22,
                               ease,
                             }}
                             className="grid gap-4"
@@ -805,6 +902,7 @@ export default function CinematicHero() {
                                   placeholder="Your full name"
                                   autoComplete="name"
                                   required
+                                  inputRef={nameInputRef}
                                 />
 
                                 <Field
@@ -826,6 +924,7 @@ export default function CinematicHero() {
                                   placeholder="you@example.com"
                                   autoComplete="email"
                                   required
+                                  inputRef={emailInputRef}
                                 />
                               </>
                             )}
@@ -834,32 +933,33 @@ export default function CinematicHero() {
                               <div>
                                 <label
                                   htmlFor="misa-interest"
-                                  className="mb-2 block text-[10px] uppercase tracking-[0.16em] text-white/50"
+                                  className={labelClasses}
                                 >
                                   I am looking to
                                 </label>
 
                                 <select
+                                  ref={interestInputRef}
                                   id="misa-interest"
                                   name="interest"
                                   value={data.interest}
                                   onChange={updateField("interest")}
-                                  className="min-h-12 w-full appearance-none rounded-none border border-white/10 bg-[#11110F] px-4 py-3 text-base text-white outline-none transition-colors focus:border-[#FFB52A] focus-visible:ring-1 focus-visible:ring-[#FFB52A]/40 sm:text-sm"
+                                  className={`${inputClasses} appearance-none bg-[#050505]`}
                                 >
                                   {interests.map((interest) => (
                                     <option
                                       key={interest}
                                       value={interest}
-                                      className="bg-[#11110F] text-white"
+                                      className="bg-[#0D121B] text-[#F5F5F5]"
                                     >
                                       {interest}
                                     </option>
                                   ))}
                                 </select>
 
-                                <p className="mt-3 text-xs leading-6 text-white/40">
-                                  This helps us direct your enquiry to the
-                                  appropriate team.
+                                <p className="mt-3 text-xs leading-6 text-[#A7AFBF]">
+                                  This helps us direct your enquiry
+                                  to the appropriate team.
                                 </p>
                               </div>
                             )}
@@ -868,37 +968,39 @@ export default function CinematicHero() {
                               <div>
                                 <label
                                   htmlFor="misa-note"
-                                  className="mb-2 block text-[10px] uppercase tracking-[0.16em] text-white/50"
+                                  className={labelClasses}
                                 >
                                   Tell us about your brief
                                 </label>
 
                                 <textarea
+                                  ref={noteInputRef}
                                   id="misa-note"
                                   name="note"
                                   rows={5}
                                   value={data.note}
                                   onChange={updateField("note")}
                                   placeholder="Preferred location, budget, property type or other requirements..."
-                                  className="min-h-36 w-full resize-y rounded-none border border-white/10 bg-white/[0.035] px-4 py-3 text-base leading-7 text-white outline-none transition-colors placeholder:text-white/25 focus:border-[#FFB52A] focus-visible:ring-1 focus-visible:ring-[#FFB52A]/40 sm:text-sm"
+                                  className={`${inputClasses} min-h-36 resize-y leading-7`}
                                 />
 
-                                <p className="mt-3 text-xs leading-6 text-white/40">
-                                  Share as much or as little detail as you
-                                  prefer.
+                                <p className="mt-3 text-xs leading-6 text-[#A7AFBF]">
+                                  Share as much or as little detail
+                                  as you prefer.
                                 </p>
                               </div>
                             )}
                           </motion.div>
                         </AnimatePresence>
 
-                        {/* Error and loading messages */}
+                        {/* Validation and submission messages */}
 
                         {message && (
                           <p
+                            id={formMessageId}
                             role="alert"
                             aria-live="assertive"
-                            className="mt-4 border-l-2 border-[#FFB52A] bg-[#FFB52A]/[0.06] px-3 py-2 text-xs leading-5 text-[#FFD078]"
+                            className="mt-4 border-l-2 border-[#F59A16] bg-[#F59A16]/[0.08] px-3 py-2 text-xs leading-5 text-[#F5F5F5]"
                           >
                             {message}
                           </p>
@@ -906,7 +1008,7 @@ export default function CinematicHero() {
 
                         {/* Form navigation */}
 
-                        <div className="mt-6 flex items-center justify-between gap-3 border-t border-white/[0.08] pt-5">
+                        <div className="mt-6 flex items-center justify-between gap-3 border-t border-[#252D3A] pt-5">
                           {step > 1 ? (
                             <button
                               type="button"
@@ -915,13 +1017,12 @@ export default function CinematicHero() {
                                 setMessage("");
                                 setStep((current) => current - 1);
                               }}
-                              className="min-h-11 px-1 text-[10px] uppercase tracking-[0.15em] text-white/50 transition hover:text-white disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A]"
+                              className="min-h-11 px-1 text-[10px] uppercase tracking-[0.14em] text-[#A7AFBF] transition-colors hover:text-[#F5F5F5] disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A]"
                             >
                               ← Back
                             </button>
                           ) : (
-                            <span className="text-[9px] uppercase tracking-[0.12em] text-[#ffb25a]"
-                            >
+                            <span className="text-[9px] uppercase tracking-[0.12em] text-[#737B89]">
                               Step {step} of 3
                             </span>
                           )}
@@ -930,7 +1031,7 @@ export default function CinematicHero() {
                             type="submit"
                             disabled={isSubmitting}
                             aria-busy={isSubmitting}
-                            className="inline-flex min-h-12 items-center justify-center gap-3 bg-[#FFB52A] px-5 py-3.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-black transition duration-300 hover:bg-[#FFD078] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A] sm:px-6"
+                            className="inline-flex min-h-12 items-center justify-center gap-3 bg-[#FFB52A] px-5 py-3.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#050505] transition-colors duration-200 hover:bg-[#F59A16] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A] sm:px-6"
                           >
                             {isSubmitting
                               ? "Sending..."
@@ -950,68 +1051,75 @@ export default function CinematicHero() {
                   )}
                 </div>
 
-                <p className="mt-4 text-center text-[9px] uppercase tracking-[0.12em] text-white/30 sm:tracking-[0.16em]">
+                <p className="mt-4 text-center text-[9px] uppercase tracking-[0.12em] text-[#A7AFBF] sm:tracking-[0.16em]">
                   Confidential enquiry · MISA NG LTD
                 </p>
               </div>
             </motion.div>
           </div>
 
-          {/* -------------------------------------------------------------- */}
-          {/* SCROLL INDICATOR                                               */}
-          {/* -------------------------------------------------------------- */}
+          {/* ================================================================= */}
+          {/* SCROLL INDICATOR                                                  */}
+          {/* ================================================================= */}
 
           <button
             type="button"
             onClick={() => goTo("properties")}
-            className="mx-auto mb-8 hidden items-center gap-4 text-[9px] uppercase tracking-[0.3em] text-white/35 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A] lg:flex"
+            className="mx-auto mb-8 hidden min-h-11 items-center gap-4 text-[9px] uppercase tracking-[0.28em] text-[#A7AFBF] transition-colors hover:text-[#F5F5F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A] lg:flex"
           >
             <span>Discover</span>
-            <span className="h-10 w-px bg-white/20" />
+            <span
+              className="h-10 w-px bg-[#252D3A]"
+              aria-hidden="true"
+            />
             <span aria-hidden="true">↓</span>
           </button>
 
-          {/* -------------------------------------------------------------- */}
-          {/* ABOUT MISA                                                     */}
-          {/* -------------------------------------------------------------- */}
+          {/* ================================================================= */}
+          {/* ABOUT MISA                                                        */}
+          {/* ================================================================= */}
 
-          <div className="relative bg-gradient-to-b from-[#080807] via-[#0A0F17] to-[#0A0F17] px-4 pb-16 pt-16 sm:px-6 sm:pb-20 sm:pt-24 lg:px-10 lg:pb-28">
+          <div className="relative border-t border-[#252D3A] bg-gradient-to-b from-[#050505] via-[#0A0F17] to-[#0A0F17] px-5 pb-16 pt-16 sm:px-8 sm:pb-20 sm:pt-24 lg:px-12 lg:pb-28 xl:px-16">
             <motion.div
               initial={
                 prefersReducedMotion
-                  ? { opacity: 1 }
-                  : { opacity: 0, y: 24 }
+                  ? false
+                  : { opacity: 0, y: 20 }
               }
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}
               transition={{
-                duration: prefersReducedMotion ? 0 : 0.8,
+                duration: prefersReducedMotion ? 0 : 0.7,
                 ease,
               }}
               className="mx-auto max-w-[1500px]"
             >
-              <div className="max-w-3xl">
-                <h3 className="mb-5 font-serif max-w-[220px] flex items-center gap-2 text-[2rem] tracking[-0.02] font-dark text-white">
-                  <span className="h-3 w-3 font-serif rounded-full bg-[#FFB52A]" />
-                  MISA<span className="text-[#ffb52a]">NG</span>
-                </h3>
+              <div className="max-w-4xl">
+                <h2 className="mb-5 flex items-center gap-3 font-serif text-3xl font-normal tracking-[-0.03em] text-[#F5F5F5] sm:text-4xl">
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-full bg-[#FFB52A]"
+                    aria-hidden="true"
+                  />
+                  MISA <span className="text-[#FFB52A]">NG</span>
+                </h2>
 
-                <p className="font-serif text-xl font-light leading-relaxed text-white/90 sm:text-2xl md:text-3xl">
-                  We list verified properties, onboard developers and structure
-                  investments across residential, commercial and land. As part
-                  of Strategic Infrastructure and Resource Partners
-                  (SIR-Partners), we operate on a commission basis, with
-                  commissions payable upon completed transactions under agreed
-                  terms.
+                <p className="font-serif text-xl font-normal leading-relaxed text-[#F5F5F5] sm:text-2xl md:text-3xl">
+                  We list verified properties, onboard developers
+                  and structure investments across residential,
+                  commercial and land. As part of Strategic
+                  Infrastructure and Resource Partners (SIR-Partners),
+                  we operate on a commission basis, with commissions
+                  payable upon completed transactions under agreed terms.
                 </p>
 
                 <button
                   type="button"
                   onClick={() => goTo("invest")}
-                  className="group mt-8 inline-flex items-center gap-4 text-xs text-white/60 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A]"
+                  className="group mt-8 inline-flex min-h-11 items-center gap-4 text-xs text-[#A7AFBF] transition-colors hover:text-[#F5F5F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A]"
                 >
                   Learn more
-                  <span className="grid h-7 w-7 rotate-45 place-items-center bg-[#ffb25a] text-black transition duration-300 group-hover:scale-110">
+
+                  <span className="grid h-8 w-8 rotate-45 place-items-center bg-[#FFB52A] text-[#050505] transition-transform duration-200 group-hover:scale-105">
                     <svg
                       viewBox="0 0 24 24"
                       className="h-3.5 w-3.5 -rotate-45"
@@ -1019,6 +1127,7 @@ export default function CinematicHero() {
                       stroke="currentColor"
                       strokeWidth="2"
                       aria-hidden="true"
+                      focusable="false"
                     >
                       <path d="M5 12h14m-6-6 6 6-6 6" />
                     </svg>
@@ -1028,6 +1137,26 @@ export default function CinematicHero() {
             </motion.div>
           </div>
         </div>
+
+        {/* ================================================================== */}
+        {/* GLOBAL REDUCED-MOTION SUPPORT                                      */}
+        {/* ================================================================== */}
+
+        <style jsx global>{`
+          @media (prefers-reduced-motion: reduce) {
+            html:focus-within {
+              scroll-behavior: auto !important;
+            }
+
+            *,
+            *::before,
+            *::after {
+              animation-duration: 0.01ms !important;
+              animation-iteration-count: 1 !important;
+              scroll-behavior: auto !important;
+            }
+          }
+        `}</style>
       </section>
     </MotionConfig>
   );

@@ -6,6 +6,7 @@ import LeadButton from "@/components/LeadButton";
 import Reveal from "@/components/Reveal";
 import { news } from "@/lib/data";
 import Link from "next/link";
+import GemGrid from "@/components/GemGrid";
 
 const pillars = [
   {
@@ -277,6 +278,122 @@ export default function Home() {
 
         <Properties />
       </section>
+{/* =========================================================
+    THE GEM COLLECTION
+========================================================= */}
+<section
+  id="gems"
+  className="relative overflow-hidden border-y border-white/[0.08] bg-[#080B10] text-white"
+>
+  {/* Ambient background lighting */}
+  <div className="pointer-events-none absolute -left-40 top-20 h-[400px] w-[400px] rounded-full bg-emerald-500/[0.07] blur-[140px]" />
+  <div className="pointer-events-none absolute -right-40 bottom-0 h-[450px] w-[450px] rounded-full bg-amber-500/[0.06] blur-[140px]" />
+  <div className="relative mx-auto max-w-[1500px] px-6 py-24 sm:px-8 sm:py-32 lg:px-10 lg:py-36">
+    {/* HEADER */}
+    <Reveal>
+      <div className="grid gap-10 border-b border-white/[0.10] pb-12 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div>
+          <div className="flex items-center gap-4">
+            <span className="h-px w-10 bg-[#C49A52]" />
+            <p className="text-[9px] font-medium uppercase tracking-[0.35em] text-[#C49A52]">
+              Beyond the ordinary
+            </p>
+          </div>
+          <h2 className="mt-7 max-w-4xl font-serif text-[clamp(3.2rem,7vw,7rem)] leading-[0.88] tracking-[-0.055em]">
+            Nature&apos;s
+            <br />
+            <span className="italic text-white/35">
+              rarest expressions.
+            </span>
+          </h2>
+          <p className="mt-7 max-w-xl text-[13px] leading-7 text-white/45 sm:text-sm">
+            Discover a considered collection of gemstones,
+            selected for their colour, character and enduring
+            appeal. Exceptional stones, presented with the
+            attention they deserve.
+          </p>
+        </div>
+        {/* COLLECTION MARKER */}
+        <div className="flex items-center gap-5 lg:pb-2">
+          <div className="grid h-14 w-14 place-items-center rounded-full border border-[#C49A52]/30">
+            <svg
+              viewBox="0 0 40 40"
+              fill="none"
+              className="h-7 w-7 text-[#C49A52]"
+              aria-hidden="true"
+            >
+              <path
+                d="M20 3 34 13 29 31 20 37 11 31 6 13 20 3Z"
+                stroke="currentColor"
+                strokeWidth="1"
+              />
+              <path
+                d="M6 13h28M11 31l9-18 9 18M14 8l6 5 6-5M20 13v24"
+                stroke="currentColor"
+                strokeWidth=".7"
+              />
+            </svg>
+          </div>
+          <div>
+            <p className="text-[9px] uppercase tracking-[0.25em] text-white/35">
+              MISA Collection
+            </p>
+            <p className="mt-2 font-serif text-xl">
+              The art of rarity
+            </p>
+          </div>
+        </div>
+      </div>
+    </Reveal>
+    {/* COLLECTION INTRODUCTION */}
+    <Reveal delay={100}>
+      <div className="flex flex-col justify-between gap-5 py-8 sm:flex-row sm:items-center">
+        <div>
+          <p className="text-[9px] uppercase tracking-[0.28em] text-[#C49A52]">
+            Explore the collection
+          </p>
+          <h3 className="mt-3 font-serif text-2xl sm:text-3xl">
+            Stones with a story.
+          </h3>
+        </div>
+        <p className="max-w-md text-[12px] leading-6 text-white/40">
+          From captivating emeralds to brilliant diamonds,
+          discover gemstones with distinctive character and
+          timeless beauty.
+        </p>
+      </div>
+    </Reveal>
+    {/* GEM CARDS */}
+    <div className="gems-premium-grid">
+      <GemGrid limit={4} />
+    </div>
+    {/* FOOTER CTA */}
+    <Reveal>
+      <div className="mt-14 flex flex-col gap-6 border-t border-white/[0.10] pt-8 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-[9px] uppercase tracking-[0.25em] text-white/30">
+            The complete collection
+          </p>
+          <p className="mt-2 font-serif text-xl text-white/80">
+            Discover more exceptional stones.
+          </p>
+        </div>
+        <Link
+          href="/gems"
+          className="group inline-flex min-h-[48px] items-center justify-center gap-3 bg-[#C49A52] px-5 py-3 text-[9px] font-medium uppercase tracking-[0.18em] text-[#080B10] transition duration-300 hover:bg-[#D6B97C]"
+        >
+          <span>Explore all gems</span>
+          <span
+            aria-hidden="true"
+            className="text-base transition-transform duration-300 group-hover:translate-x-1"
+          >
+            →
+          </span>
+        </Link>
+      </div>
+    </Reveal>
+  </div>
+</section>
 
       {/* =========================================================
           DEVELOPER PARTNERSHIPS

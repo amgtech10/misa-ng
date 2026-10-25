@@ -7,6 +7,7 @@ import Reveal from "@/components/Reveal";
 import { news } from "@/lib/data";
 import Link from "next/link";
 import GemGrid from "@/components/GemGrid";
+import Footer from "@/components/Footer";
 
 const pillars = [
   {
@@ -574,137 +575,7 @@ export default function Home() {
       {/* =========================================================
           CONTACT / FOOTER
       ========================================================= */}
-      <footer
-        id="contact"
-        className="relative overflow-hidden border-t border-white/[0.08] bg-[#05080d]"
-      >
-        <div className="pointer-events-none absolute right-[-10%] top-[-20%] h-[500px] w-[500px] rounded-full bg-brand/[0.04] blur-[130px]" />
-
-        <div className="relative mx-auto max-w-[1500px] px-6 py-24 sm:px-8 lg:px-10 lg:py-32">
-          <div className="grid gap-20 lg:grid-cols-[1.5fr_.5fr_.5fr]">
-            <div>
-              <div className="flex items-center gap-3">
-                <span className="h-px w-8 bg-brand" />
-
-                <span className="text-[9px] uppercase tracking-[0.3em] text-brand">
-                  MISA NG LTD
-                </span>
-              </div>
-
-              <h2 className="mt-8 max-w-3xl font-serif text-[clamp(3rem,6vw,6rem)] leading-[0.88] tracking-[-0.045em]">
-                Real estate,
-                <br />
-                <span className="italic text-white/30">
-                  approached differently.
-                </span>
-              </h2>
-
-              <p className="mt-8 max-w-xl text-[13px] leading-7 text-white/40">
-                Municipal Integrated Service Agent NG Ltd — MISA NG LTD — is
-                part of Strategic Infrastructure and Resource Partners
-                (SIR-Partners).
-              </p>
-
-              <div className="mt-10">
-                <LeadButton type="Contact request">
-                  Contact Us
-                </LeadButton>
-              </div>
-            </div>
-
-            <nav className="grid content-start gap-4">
-              <p className="mb-3 text-[9px] uppercase tracking-[0.28em] text-white">
-                Explore
-              </p>
-
-              <a
-                href="#properties"
-                className="text-[13px] text-white/45 transition hover:text-brand"
-              >
-                Properties
-              </a>
-
-              <Link
-                href="/invest"
-                className="text-[13px] text-white/45 transition hover:text-brand"
-              >
-                Investments
-              </Link>
-
-              <a
-                href="#newsfeed"
-                className="text-[13px] text-white/45 transition hover:text-brand"
-              >
-                Market intelligence
-              </a>
-            </nav>
-
-            <nav className="grid content-start gap-4">
-              <p className="mb-3 text-[9px] uppercase tracking-[0.28em] text-white">
-                Connect
-              </p>
-
-              <a
-                href="#developers"
-                className="text-[13px] text-white/45 transition hover:text-brand"
-              >
-                Developers
-              </a>
-
-              <a
-                href="#contact"
-                className="text-[13px] text-white/45 transition hover:text-brand"
-              >
-                Contact
-              </a>
-
-              <a
-                href="#top"
-                className="text-[13px] text-white/45 transition hover:text-brand"
-              >
-                Back to top ↑
-              </a>
-            </nav>
-          </div>
-
-          <div className="mt-24 flex flex-col justify-between gap-5 border-t border-white/[0.08] pt-7 text-[9px] uppercase tracking-[0.18em] text-white/25 sm:flex-row">
-            <p>
-              © {new Date().getFullYear()} MISA NG LTD. All rights reserved.
-            </p>
-
-            <p>Abuja · Nigeria</p>
-          </div>
-        </div>
-      </footer>
-
-      {/* =========================================================
-          FLOATING WHATSAPP
-      ========================================================= */}
-      {wa && (
-        <a
-          href={`https://wa.me/${+233505171018}?text=${encodeURIComponent(
-            "Hello MISA NG, I would like to enquire about a property."
-          )}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Chat with MISA NG on WhatsApp"
-          className="group fixed bottom-60 right-6 z-30"
-        >
-          <span className="absolute inset-0 rounded-full bg-profit/30 blur-xl transition duration-500 group-hover:scale-125" />
-
-          <span className="relative grid h-14 w-14 place-items-center rounded-full bg-profit text-ink shadow-2xl shadow-black/40 transition duration-300 group-hover:scale-105">
-            <svg
-              viewBox="0 0 24 24"
-              className="h-6 w-6"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.9 5-1.3A10 10 0 1 0 12 2Zm5.2 14c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 .9-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6c-.1.1-.3.3-.1.6.6 1 1.4 1.8 2.4 2.3.3.1.5.1.6-.1l.8-1c.2-.2.4-.2.6-.1l1.9.9c.2.1.4.2.4.3.1.2.1.8-.1 1.4Z" />
-            </svg>
-          </span>
-        </a>
-      )}
-
+<Footer />
       <LeadModal />
     </main>
   );

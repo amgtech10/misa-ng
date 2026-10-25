@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import GemGrid from "@/components/GemGrid";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Gem Collection | MISA NG LTD",
@@ -48,6 +50,7 @@ export default function GemsPage() {
         } as React.CSSProperties
       }
     >
+    <Navbar />
       {/* BACKGROUND ATMOSPHERE */}
 
       <div
@@ -275,7 +278,6 @@ export default function GemsPage() {
       </section>
 
       {/* FOOTER */}
-
       <footer className="relative border-t border-[#252D3A]">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
           <p className="text-[9px] uppercase tracking-[0.15em] text-[#737B89]">
@@ -294,6 +296,7 @@ export default function GemsPage() {
           </Link>
         </div>
       </footer>
+      <Footer />
     </main>
   );
 }

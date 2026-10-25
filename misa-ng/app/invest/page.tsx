@@ -9,6 +9,7 @@ import {
 } from "react";
 import { sendLead } from "@/lib/lead";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const COLORS = {
   background: "#050505",
@@ -852,6 +853,7 @@ export default function InvestPage() {
           </Link>
         </div>
       </footer>
+      <Footer />
     </main>
   );
 }
@@ -1048,6 +1050,7 @@ function ChoiceGroup({
           </button>
         );
       })}
+
     </div>
   );
 }

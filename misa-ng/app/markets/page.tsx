@@ -1,5 +1,7 @@
 "use client";
 
+import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 import {
   useCallback,
   useEffect,
@@ -366,6 +368,8 @@ export default function ExchangeDashboard() {
 
   return (
     <main className="min-h-screen bg-[#050505] text-[#F5F5F5]">
+      <Navbar />
+      
       <style jsx global>{`
         @keyframes misa-ticker {
           from {
@@ -1372,6 +1376,7 @@ export default function ExchangeDashboard() {
           </div>
         </div>
       )}
+      <Footer />
     </main>
   );
 }

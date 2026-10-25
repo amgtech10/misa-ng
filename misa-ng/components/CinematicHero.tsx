@@ -643,7 +643,7 @@ export default function CinematicHero() {
                 <span className="h-px w-8 shrink-0 bg-[#FFB52A] sm:w-12" />
 
                 <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-[#FFB52A] sm:text-[10px] sm:tracking-[0.28em]">
-                  Nigerian property advisory
+                  property advisory
                 </span>
               </motion.div>
 
@@ -681,7 +681,7 @@ export default function CinematicHero() {
                   </motion.span>
                 </span>
 
-                <span className="mt-3 block overflow-hidden pb-2 sm:mt-4">
+                <span className="mt-4 block overflow-hidden pb-2 sm:mt-4">
                   <motion.span variants={rise} className="block">
                     <span className="sr-only">
                       Nigeria: residential, commercial, land and
@@ -992,7 +992,6 @@ export default function CinematicHero() {
                             )}
                           </motion.div>
                         </AnimatePresence>
-
                         {/* Validation and submission messages */}
 
                         {message && (
@@ -1095,9 +1094,9 @@ export default function CinematicHero() {
               className="mx-auto max-w-[1500px]"
             >
               <div className="max-w-4xl">
-                <h2 className="mb-5 flex items-center gap-3 font-serif text-3xl font-normal tracking-[-0.03em] text-[#F5F5F5] sm:text-4xl">
+                <h2 className="mb-5 flex items-center gap-2 border-b-2 w-40 border-[#FFB52A] font-serif text-3xl font-normal py-2 px-2 items-center tracking-[-0.03em] text-[#F5F5F5] tracking-tighter sm:text-4xl">
                   <span
-                    className="h-2.5 w-2.5 shrink-0 rounded-full bg-[#FFB52A]"
+                    className="h-2 w-2shrink-0 rounded-full bg-[#FFB52A]"
                     aria-hidden="true"
                   />
                   MISA <span className="text-[#FFB52A]">NG</span>

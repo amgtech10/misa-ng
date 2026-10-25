@@ -43,7 +43,6 @@ export default function LeadForm({
   const [status, setStatus] = useState<SubmitState>("idle");
   const [message, setMessage] = useState("");
 
-  // Prevent invalid step indexes when the supplied steps change.
   const safeStep = Math.min(step, Math.max(steps.length - 1, 0));
   const currentFields = steps[safeStep] ?? [];
   const lastStep = safeStep === steps.length - 1;
@@ -51,6 +50,28 @@ export default function LeadForm({
   const progress =
     steps.length > 0 ? ((safeStep + 1) / steps.length) * 100 : 0;
 
+  /**
+   * Handles changes to inputs, textareas and select elements.
+   */
+  function handleChange(name: string) {
+    return (event: InputChangeEvent) => {
+      const value = event.target.value;
+
+      setData((current) => ({
+        ...current,
+        [name]: value,
+      }));
+
+      if (status === "err") {
+        setStatus("idle");
+        setMessage("");
+      }
+    };
+  }
+
+  /**
+   * Updates a field programmatically.
+   */
   function updateField(name: string, value: string) {
     setData((current) => ({
       ...current,
@@ -63,15 +84,23 @@ export default function LeadForm({
     }
   }
 
-  function handleChange(name: string) {
-    return (event: InputChangeEvent) => {
-      updateField(name, event.target.value);
-    };
-  }
-
+  /**
+   * Validates the fields in the current step.
+   */
   function validateCurrentStep(): boolean {
     for (const field of currentFields) {
       if (field.r && !(data[field.n] ?? "").trim()) {
+        return false;
+      }
+
+      const value = (data[field.n] ?? "").trim();
+
+      if (
+        value &&
+        field.t === "email" &&
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+      ) {
+        setMessage(`Please enter a valid email address.`);
         return false;
       }
     }
@@ -79,40 +108,93 @@ export default function LeadForm({
     return true;
   }
 
+  /**
+   * Continues to the next step.
+   */
   function handleNext() {
     if (status === "busy") return;
 
     if (!validateCurrentStep()) {
       setStatus("err");
-      setMessage(
-        "Please complete the required fields before continuing."
+
+      setMessage((currentMessage) =>
+        currentMessage || "Please complete the required fields correctly."
       );
+
       return;
     }
 
     setStatus("idle");
     setMessage("");
+
     setStep((current) => Math.min(current + 1, steps.length - 1));
   }
 
+  /**
+   * Returns to the previous step.
+   */
   function handleBack() {
     if (status === "busy") return;
 
     setStatus("idle");
     setMessage("");
+
     setStep((current) => Math.max(current - 1, 0));
   }
 
+  /**
+   * Submits the enquiry to the API.
+   */
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (status === "busy") return;
 
-    if (!validateCurrentStep()) {
+    // Validate every step, not just the currently visible fields.
+    const missingRequiredField = steps.some((fields) =>
+      fields.some(
+        (field) =>
+          field.r && !(data[field.n] ?? "").trim()
+      )
+    );
+
+    const invalidEmail = steps.some((fields) =>
+      fields.some((field) => {
+        const value = (data[field.n] ?? "").trim();
+
+        return (
+          field.t === "email" &&
+          value.length > 0 &&
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+        );
+      })
+    );
+
+    if (missingRequiredField || invalidEmail) {
       setStatus("err");
+
       setMessage(
-        "Please complete the required fields before submitting."
+        missingRequiredField
+          ? "Please complete all required fields before submitting."
+          : "Please enter a valid email address."
       );
+
+      const firstIncompleteStep = steps.findIndex((fields) =>
+        fields.some(
+          (field) =>
+            (field.r && !(data[field.n] ?? "").trim()) ||
+            (field.t === "email" &&
+              !!(data[field.n] ?? "").trim() &&
+              !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                (data[field.n] ?? "").trim()
+              ))
+        )
+      );
+
+      if (firstIncompleteStep >= 0) {
+        setStep(firstIncompleteStep);
+      }
+
       return;
     }
 
@@ -162,6 +244,9 @@ export default function LeadForm({
     return null;
   }
 
+  /**
+   * Success state.
+   */
   if (status === "done") {
     return (
       <div className="relative overflow-hidden border border-white/[0.08] bg-[#0c0f14] p-8 sm:p-10">
@@ -275,9 +360,7 @@ export default function LeadForm({
 
             <div className="mt-2 flex justify-between text-[8px] uppercase tracking-[0.16em] text-white/20">
               <span>Enquiry</span>
-              <span>
-                {lastStep ? "Review & submit" : "Your details"}
-              </span>
+              <span>{lastStep ? "Review & submit" : "Your details"}</span>
             </div>
           </div>
         )}
@@ -288,6 +371,17 @@ export default function LeadForm({
             const id = `${formId}-lead-${field.n}`;
             const value = data[field.n] ?? "";
             const errorId = `${id}-error`;
+
+            const isRequiredError =
+              status === "err" && !!field.r && !value.trim();
+
+            const isEmailError =
+              status === "err" &&
+              field.t === "email" &&
+              !!value.trim() &&
+              !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+
+            const hasFieldError = isRequiredError || isEmailError;
 
             return (
               <div
@@ -311,7 +405,6 @@ export default function LeadForm({
                   )}
                 </label>
 
-                {/* Select */}
                 {field.o ? (
                   <div className="relative">
                     <select
@@ -320,15 +413,9 @@ export default function LeadForm({
                       required={field.r}
                       value={value}
                       onChange={handleChange(field.n)}
-                      aria-invalid={
-                        status === "err" && field.r && !value.trim()
-                          ? true
-                          : undefined
-                      }
+                      aria-invalid={hasFieldError || undefined}
                       aria-describedby={
-                        status === "err" && field.r && !value.trim()
-                          ? errorId
-                          : undefined
+                        hasFieldError ? errorId : undefined
                       }
                       className="min-h-[50px] w-full appearance-none border border-white/[0.1] bg-[#11151b] px-4 pr-10 text-sm text-white outline-none transition duration-300 focus:border-brand/60 focus:ring-1 focus:ring-brand/20"
                     >
@@ -363,7 +450,6 @@ export default function LeadForm({
                     </svg>
                   </div>
                 ) : field.t === "area" ? (
-                  /* Textarea */
                   <textarea
                     id={id}
                     name={field.n}
@@ -372,20 +458,13 @@ export default function LeadForm({
                     value={value}
                     onChange={handleChange(field.n)}
                     placeholder={field.p}
-                    aria-invalid={
-                      status === "err" && field.r && !value.trim()
-                        ? true
-                        : undefined
-                    }
+                    aria-invalid={hasFieldError || undefined}
                     aria-describedby={
-                      status === "err" && field.r && !value.trim()
-                        ? errorId
-                        : undefined
+                      hasFieldError ? errorId : undefined
                     }
                     className="min-h-[110px] w-full resize-none border border-white/[0.1] bg-white/[0.025] px-4 py-3 text-sm text-white outline-none placeholder:text-white/20 transition duration-300 focus:border-brand/60 focus:bg-white/[0.04] focus:ring-1 focus:ring-brand/20"
                   />
                 ) : (
-                  /* Input */
                   <input
                     id={id}
                     name={field.n}
@@ -394,30 +473,24 @@ export default function LeadForm({
                     value={value}
                     onChange={handleChange(field.n)}
                     placeholder={field.p}
-                    aria-invalid={
-                      status === "err" && field.r && !value.trim()
-                        ? true
-                        : undefined
-                    }
+                    aria-invalid={hasFieldError || undefined}
                     aria-describedby={
-                      status === "err" && field.r && !value.trim()
-                        ? errorId
-                        : undefined
+                      hasFieldError ? errorId : undefined
                     }
                     className="min-h-[50px] w-full border border-white/[0.1] bg-white/[0.025] px-4 text-sm text-white outline-none placeholder:text-white/20 transition duration-300 focus:border-brand/60 focus:bg-white/[0.04] focus:ring-1 focus:ring-brand/20"
                   />
                 )}
 
-                {status === "err" &&
-                  field.r &&
-                  !value.trim() && (
-                    <p
-                      id={errorId}
-                      className="mt-2 text-[10px] text-red-300/80"
-                    >
-                      {field.l} is required.
-                    </p>
-                  )}
+                {hasFieldError && (
+                  <p
+                    id={errorId}
+                    className="mt-2 text-[10px] text-red-300/80"
+                  >
+                    {isEmailError
+                      ? "Please enter a valid email address."
+                      : `${field.l} is required.`}
+                  </p>
+                )}
               </div>
             );
           })}
@@ -429,10 +502,7 @@ export default function LeadForm({
             className="mt-5 flex items-start gap-3 border border-red-400/15 bg-red-400/[0.04] px-4 py-3"
             role="alert"
           >
-            <span
-              className="mt-0.5 text-red-400"
-              aria-hidden="true"
-            >
+            <span className="mt-0.5 text-red-400" aria-hidden="true">
               !
             </span>
 
@@ -495,7 +565,7 @@ export default function LeadForm({
           </button>
         </div>
 
-        {/* Footer */}
+        {/* Privacy notice */}
         <p className="mt-6 text-[8px] leading-5 tracking-[0.08em] text-white/20">
           Your information is treated confidentially and used only
           to respond to this enquiry.

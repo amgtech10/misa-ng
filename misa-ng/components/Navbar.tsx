@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Building2,
@@ -27,7 +27,6 @@ const links = [
     label: "Gems",
     href: "/gems",
     icon: Gem,
-    accent: true,
   },
   {
     label: "Developers",
@@ -43,7 +42,6 @@ const links = [
     label: "Exchange",
     href: "/markets",
     icon: ArrowLeftRight,
-    accent: true,
   },
   {
     label: "News",
@@ -57,6 +55,9 @@ const links = [
   },
 ];
 
+const actionButtonClasses =
+  "inline-flex min-h-11 items-center justify-center gap-2 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB52A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0F17] motion-reduce:transition-none";
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -64,9 +65,9 @@ export default function Navbar() {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
-  /* ------------------------------------------------------------------------ */
-  /* Scroll-aware header                                                      */
-  /* ------------------------------------------------------------------------ */
+  // ---------------------------------------------------------------------------
+  // Scroll-aware header
+  // ---------------------------------------------------------------------------
 
   useEffect(() => {
     let ticking = false;
@@ -93,9 +94,23 @@ export default function Navbar() {
     };
   }, []);
 
-  /* ------------------------------------------------------------------------ */
-  /* Keyboard and mobile-menu behaviour                                       */
-  /* ------------------------------------------------------------------------ */
+  // ---------------------------------------------------------------------------
+  // Close mobile navigation
+  // ---------------------------------------------------------------------------
+
+  const closeMobileMenu = useCallback((restoreFocus = false) => {
+    setMobileOpen(false);
+
+    if (restoreFocus) {
+      window.requestAnimationFrame(() => {
+        menuButtonRef.current?.focus();
+      });
+    }
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Mobile menu keyboard accessibility and scroll locking
+  // ---------------------------------------------------------------------------
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -123,8 +138,8 @@ export default function Navbar() {
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setMobileOpen(false);
-        menuButtonRef.current?.focus();
+        event.preventDefault();
+        closeMobileMenu(true);
         return;
       }
 
@@ -139,7 +154,10 @@ export default function Navbar() {
           'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
         ),
       ).filter((element) => {
-        return element.getAttribute("aria-hidden") !== "true";
+        return (
+          element.getAttribute("aria-hidden") !== "true" &&
+          !element.hasAttribute("disabled")
+        );
       });
 
       if (focusableElements.length === 0) return;
@@ -147,7 +165,10 @@ export default function Navbar() {
       const firstElement = focusableElements[0];
       const lastElement = focusableElements[focusableElements.length - 1];
 
-      if (event.shiftKey && document.activeElement === firstElement) {
+      if (
+        event.shiftKey &&
+        document.activeElement === firstElement
+      ) {
         event.preventDefault();
         lastElement.focus();
       } else if (
@@ -163,16 +184,17 @@ export default function Navbar() {
 
     return () => {
       window.cancelAnimationFrame(frame);
+
       window.removeEventListener("keydown", handleKeyDown);
 
       document.body.style.overflow = previousOverflow;
       document.body.style.paddingRight = previousPaddingRight;
     };
-  }, [mobileOpen]);
+  }, [mobileOpen, closeMobileMenu]);
 
-  /* ------------------------------------------------------------------------ */
-  /* Close the mobile menu when moving to desktop layout                      */
-  /* ------------------------------------------------------------------------ */
+  // ---------------------------------------------------------------------------
+  // Close mobile menu when switching to desktop
+  // ---------------------------------------------------------------------------
 
   useEffect(() => {
     const desktopQuery = window.matchMedia("(min-width: 1280px)");
@@ -195,23 +217,27 @@ export default function Navbar() {
     };
   }, []);
 
-  const closeMobileMenu = () => {
-    setMobileOpen(false);
-  };
+  // ---------------------------------------------------------------------------
+  // Lead actions
+  // ---------------------------------------------------------------------------
 
   const openLeadFromMenu = (type: string) => {
     closeMobileMenu();
     openLead(type);
   };
 
-  const actionButtonClasses =
-    "inline-flex min-h-11 items-center justify-center gap-2 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB52A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0F17] motion-reduce:transition-none";
+  // ---------------------------------------------------------------------------
+  // Navigation link styling
+  // ---------------------------------------------------------------------------
+
+  const desktopLinkClasses =
+    "group inline-flex min-h-10 items-center justify-center gap-1.5 px-2.5 text-[11px] font-medium text-[#A7AFBF] transition-colors duration-200 hover:text-[#FFB52A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#FFB52A] 2xl:gap-2 2xl:px-3 2xl:text-xs motion-reduce:transition-none";
 
   return (
     <>
-      {/* ==================================================================== */}
-      {/* FIXED HEADER                                                         */}
-      {/* ==================================================================== */}
+      {/* ===================================================================== */}
+      {/* FIXED HEADER                                                          */}
+      {/* ===================================================================== */}
 
       <header
         className={`fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,box-shadow] duration-300 motion-reduce:transition-none ${
@@ -228,7 +254,7 @@ export default function Navbar() {
 
           <Link
             href="/"
-            onClick={closeMobileMenu}
+            onClick={() => closeMobileMenu()}
             className="group flex min-w-0 shrink-0 items-center gap-2.5 sm:gap-3"
             aria-label="MISA NG LTD home"
           >
@@ -254,7 +280,7 @@ export default function Navbar() {
 
           {/* Desktop navigation */}
 
-          <div className="hidden items-center gap-0.5 2xl:gap-1 xl:flex">
+          <div className="hidden items-center gap-0.5 xl:flex 2xl:gap-1">
             {links.map((link) => {
               const Icon = link.icon;
 
@@ -262,11 +288,7 @@ export default function Navbar() {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className={`group inline-flex min-h-10 items-center justify-center gap-1.5 px-2.5 text-[11px] font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#FFB52A] 2xl:gap-2 2xl:px-3 2xl:text-xs ${
-                    link.accent
-                      ? "text-[#FFB52A] hover:text-[#F59A16]"
-                      : "text-[#A7AFBF] hover:text-[#F5F5F5]"
-                  }`}
+                  className={desktopLinkClasses}
                 >
                   <Icon
                     size={14}
@@ -312,7 +334,13 @@ export default function Navbar() {
           <button
             ref={menuButtonRef}
             type="button"
-            onClick={() => setMobileOpen((open) => !open)}
+            onClick={() => {
+              if (mobileOpen) {
+                closeMobileMenu(true);
+              } else {
+                setMobileOpen(true);
+              }
+            }}
             className="inline-flex h-11 w-11 shrink-0 items-center justify-center border border-[#252D3A] text-[#F5F5F5] transition-colors duration-200 hover:border-[#FFB52A] hover:text-[#FFB52A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB52A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0F17] xl:hidden motion-reduce:transition-none"
             aria-label={
               mobileOpen
@@ -331,9 +359,9 @@ export default function Navbar() {
         </nav>
       </header>
 
-      {/* ==================================================================== */}
-      {/* MOBILE NAVIGATION                                                    */}
-      {/* ==================================================================== */}
+      {/* ===================================================================== */}
+      {/* MOBILE NAVIGATION                                                     */}
+      {/* ===================================================================== */}
 
       <div
         ref={mobileMenuRef}
@@ -359,7 +387,10 @@ export default function Navbar() {
 
           <div className="mb-7 border-b border-[#252D3A] pb-6 sm:mb-8">
             <p className="flex items-center gap-3 text-[9px] font-medium uppercase tracking-[0.24em] text-[#FFB52A] sm:text-[10px]">
-              <span className="h-px w-7 bg-[#FFB52A]" aria-hidden="true" />
+              <span
+                className="h-px w-7 bg-[#FFB52A]"
+                aria-hidden="true"
+              />
               Explore MISA
             </p>
 
@@ -387,12 +418,8 @@ export default function Navbar() {
                   <Link
                     key={link.label}
                     href={link.href}
-                    onClick={closeMobileMenu}
-                    className={`group flex min-h-[60px] items-center justify-between border-b border-[#252D3A]/70 py-3 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#FFB52A] ${
-                      link.accent
-                        ? "text-[#FFB52A]"
-                        : "text-[#F5F5F5]"
-                    }`}
+                    onClick={() => closeMobileMenu()}
+                    className="group flex min-h-[60px] items-center justify-between border-b border-[#252D3A]/70 py-3 text-[#A7AFBF] transition-colors duration-200 hover:text-[#FFB52A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#FFB52A] motion-reduce:transition-none"
                     style={{
                       transitionDelay: mobileOpen
                         ? `${index * 25}ms`
@@ -429,7 +456,9 @@ export default function Navbar() {
           <div className="mt-7 grid gap-3 sm:grid-cols-2">
             <button
               type="button"
-              onClick={() => openLeadFromMenu("Developer onboarding")}
+              onClick={() =>
+                openLeadFromMenu("Developer onboarding")
+              }
               className="inline-flex min-h-12 items-center justify-center gap-2 border border-[#252D3A] px-4 py-4 text-[10px] font-medium uppercase tracking-[0.12em] text-[#F5F5F5] transition-colors duration-200 hover:border-[#FFB52A]/70 hover:text-[#FFB52A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB52A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] motion-reduce:transition-none"
             >
               <Users size={16} aria-hidden="true" />

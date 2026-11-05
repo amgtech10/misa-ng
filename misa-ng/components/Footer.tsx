@@ -2,32 +2,33 @@ import Link from "next/link";
 import {
   FaInstagram,
   FaFacebookF,
-  FaWhatsapp,
-  FaTwitter,
-} from "react-icons/fa";
+  FaXTwitter,
+} from "react-icons/fa6";
+
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 
 const cols: [string, [string, string][]][] = [
   [
     "Discover",
     [
-      ["Properties", "/properties"],
-      ["Market intelligence", "/journal"],
+      ["Properties", "/#properties"],
+      ["Market intelligence", "/#newsfeed"],
       ["Invest", "/invest"],
-      ["Developers", "/developers"],
+      ["Developers", "/#developers"],
     ],
   ],
   [
     "Company",
     [
       ["About MISA", "/about"],
-      ["Contact", "/contact"],
+      ["Contact", "/#contact"],
     ],
   ],
   [
     "Legal",
     [
       ["Terms", "/terms"],
-      ["Policy", "/privacy"],
+      ["Privacy policy", "/privacy"],
       ["FAQs", "/faqs"],
     ],
   ],
@@ -36,112 +37,100 @@ const cols: [string, [string, string][]][] = [
 const socialLinks = [
   {
     name: "Instagram",
-    href: "https://www.instagram.com/",
+    href: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "",
     Icon: FaInstagram,
   },
   {
     name: "X",
-    href: "https://x.com/",
-    Icon: FaTwitter,
+    href: process.env.NEXT_PUBLIC_X_URL || "",
+    Icon: FaXTwitter,
   },
   {
     name: "Facebook",
-    href: "https://www.facebook.com/",
+    href: process.env.NEXT_PUBLIC_FACEBOOK_URL || "",
     Icon: FaFacebookF,
   },
-];
-
-function getWhatsAppUrl() {
-  const number =
-    process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ||
-    process.env.NEXT_PUBLIC_WHATSAPP ||
-    "";
-
-  const cleanNumber = number.replace(/\D/g, "");
-
-  if (!cleanNumber) {
-    return "https://www.whatsapp.com/";
-  }
-
-  return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(
-    "Hello MISA NG, I would like to make an enquiry."
-  )}`;
-}
+].filter((social) => social.href.trim() !== "");
 
 const focusStyles =
   "rounded-sm outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[#FFB52A] focus-visible:ring-offset-4 focus-visible:ring-offset-[#050505]";
 
 export default function Footer() {
-  const whatsappUrl = getWhatsAppUrl();
+  const year = new Date().getFullYear();
 
   return (
     <footer
       id="contact"
       className="relative isolate overflow-hidden border-t border-[#252D3A] bg-[#050505] text-[#F5F5F5]"
     >
-      {/* Restrained brand accent */}
+      {/* Ambient brand glow */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-32 -top-32 -z-10 h-80 w-80 rounded-full bg-[#F59A16]/[0.06] blur-[100px]"
+        className="pointer-events-none absolute -right-40 -top-32 -z-10 h-80 w-80 rounded-full bg-[#F59A16]/[0.06] blur-[100px]"
       />
 
-      <div className="mx-auto max-w-[1440px] px-5 pb-6 pt-14 sm:px-8 sm:pb-8 sm:pt-16 lg:px-12 lg:pt-20">
-        {/* Main footer */}
-        <div className="grid grid-cols-1 gap-11 sm:grid-cols-2 sm:gap-x-10 sm:gap-y-12 lg:grid-cols-[1.7fr_0.8fr_0.8fr_0.8fr] lg:gap-12 xl:gap-16">
+      <div className="mx-auto w-full max-w-[1440px] px-5 pb-6 pt-12 sm:px-8 sm:pb-8 sm:pt-16 lg:px-12 lg:pt-20">
+
+        {/* Main footer grid */}
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 sm:gap-x-10 sm:gap-y-12 lg:grid-cols-[1.7fr_1fr_0.8fr_0.8fr] lg:gap-12 xl:gap-16">
+
           {/* Brand */}
-          <div className="max-w-[390px]">
+          <div className="max-w-md">
             <Link
               href="/"
               aria-label="MISA NG LTD home"
               className={`inline-flex flex-col ${focusStyles}`}
             >
-              <span className="font-serif text-[2.65rem] font-medium leading-none tracking-[-0.075em] text-[#F5F5F5] sm:text-5xl">
-                MISA
-                <span className="text-[#F59A16]">.</span>
+              <span className="font-serif text-4xl leading-none tracking-[-0.06em] text-[#F5F5F5] sm:text-5xl">
+                MISA<span className="text-[#FFB25A]">.</span>
               </span>
 
-              <span className="mt-2 pl-0.5 text-[9px] font-medium uppercase tracking-[0.34em] text-[#737B89]">
+              <span className="mt-2 pl-1 text-[9px] font-medium uppercase tracking-[0.3em] text-[#FFB25A]">
                 NG LTD
               </span>
             </Link>
 
-            <p className="mt-6 max-w-[330px] text-[13px] leading-7 text-[#A7AFBF] sm:text-sm sm:leading-7">
+            <p className="mt-5 max-w-sm text-[13px] leading-7 text-[#A7AFBF] sm:text-sm">
               Property, investment and advisory. Connecting
               discerning buyers, investors and developers with
               opportunities across Nigeria.
             </p>
 
-            <div className="mt-6 inline-flex items-center gap-2.5">
+            <div className="mt-6 flex items-center gap-2.5">
               <span
                 aria-hidden="true"
-                className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#FFB52A]"
+                className="h-px w-8 bg-[#F59A16]"
               />
 
-              <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#737B89]">
-                Abuja · Nigeria
+              <span className="text-[9px] uppercase tracking-[0.2em] text-[#737B89]">
+                Built on trust. Driven by opportunity.
               </span>
             </div>
           </div>
 
-          {/* Navigation */}
+          {/* Navigation columns */}
           {cols.map(([title, links]) => (
-            <nav key={title} aria-label={`${title} navigation`}>
+            <nav
+              key={title}
+              aria-label={`${title} links`}
+              className="min-w-0"
+            >
               <h2 className="mb-5 text-[10px] font-semibold uppercase tracking-[0.24em] text-[#FFB52A]">
                 {title}
               </h2>
 
-              <ul className="space-y-4">
+              <ul className="space-y-1">
                 {links.map(([label, href]) => (
                   <li key={label}>
                     <Link
                       href={href}
-                      className={`group inline-flex items-center gap-2 text-[13px] text-[#A7AFBF] hover:text-[#F5F5F5] sm:text-sm ${focusStyles}`}
+                      className={`group inline-flex min-h-10 items-center gap-2 py-2 text-[13px] text-[#A7AFBF] hover:text-[#F5F5F5] sm:text-sm ${focusStyles}`}
                     >
                       <span>{label}</span>
 
                       <span
                         aria-hidden="true"
-                        className="text-[#F59A16] opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100 motion-reduce:transition-none"
+                        className="text-[#F59A16] opacity-0 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100 motion-reduce:transition-none"
                       >
                         ↗
                       </span>
@@ -153,7 +142,7 @@ export default function Footer() {
           ))}
         </div>
 
-        {/* Social links */}
+        {/* Social section */}
         <section
           aria-labelledby="footer-social-heading"
           className="mt-12 border-t border-[#252D3A] pt-7 sm:mt-14 sm:pt-8 lg:mt-16"
@@ -174,7 +163,7 @@ export default function Footer() {
 
             <div
               aria-label="MISA NG LTD social media"
-              className="flex flex-wrap items-center gap-2.5"
+              className="flex flex-wrap items-center gap-3"
             >
               {socialLinks.map(({ name, href, Icon }) => (
                 <a
@@ -202,46 +191,34 @@ export default function Footer() {
                 title="WhatsApp"
                 className="group flex h-11 w-11 items-center justify-center rounded-full border border-[#252D3A] bg-[#0D121B] text-[#A7AFBF] transition-colors duration-200 hover:border-[#FFB52A] hover:bg-[#FFB52A] hover:text-[#050505] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB52A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
               >
-                <FaWhatsapp
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
                   aria-hidden="true"
-                  className="text-lg transition-transform duration-200 group-hover:scale-110 motion-reduce:transition-none"
-                />
+                  className="h-5 w-5"
+                >
+                  <path d="M20.52 3.48A11.87 11.87 0 0 0 12.05 0C5.47 0 .12 5.35.12 11.93c0 2.1.55 4.15 1.59 5.96L0 24l6.27-1.64a11.9 11.9 0 0 0 5.78 1.47h.01c6.58 0 11.93-5.35 11.94-11.93a11.87 11.87 0 0 0-3.48-8.42ZM12.06 21.8h-.01a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.72.98.99-3.63-.24-.37a9.88 9.88 0 0 1-1.52-5.26c0-5.47 4.45-9.92 9.92-9.92a9.86 9.86 0 0 1 7.02 2.91 9.86 9.86 0 0 1 2.9 7.02c0 5.47-4.45 9.92-9.94 9.92Zm5.44-7.43c-.3-.15-1.77-.87-2.05-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.95 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.46-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49s1.07 2.89 1.22 3.09c.15.2 2.1 3.2 5.08 4.49.71.31 1.27.5 1.7.64.72.23 1.37.2 1.89.12.58-.09 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35Z" />
+                </svg>
               </a>
             </div>
           </div>
         </section>
 
         {/* Bottom bar */}
-        <div className="mt-9 flex flex-col gap-3 border-t border-[#252D3A] pt-5 sm:mt-10 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:pt-6">
+        <div className="mt-8 flex flex-col gap-3 border-t border-[#252D3A] pt-5 sm:mt-10 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:pt-6">
           <p className="text-[11px] leading-5 text-[#737B89]">
-            © {new Date().getFullYear()} MISA NG LTD. All rights reserved.
+            © {year} MISA NG LTD. All rights reserved.
           </p>
 
           <p className="text-[9px] font-medium uppercase leading-5 tracking-[0.16em] text-[#737B89] sm:text-right">
-            Property <span className="px-1.5 text-[#F59A16]">·</span>
-            Investment <span className="px-1.5 text-[#F59A16]">·</span>
+            Property
+            <span className="px-1.5 text-[#F59A16]">·</span>
+            Investment
+            <span className="px-1.5 text-[#F59A16]">·</span>
             Advisory
           </p>
         </div>
       </div>
     </footer>
-  );
-}
-
-/* Floating WhatsApp button */
-export function WhatsApp() {
-  const whatsappUrl = getWhatsAppUrl();
-
-  return (
-    <a
-      href={whatsappUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Chat with MISA NG LTD on WhatsApp"
-      title="Chat with us on WhatsApp"
-      className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full border border-[#FFB52A] bg-[#FFB52A] text-[#050505] shadow-[0_8px_30px_rgba(245,154,22,0.20)] transition-[transform,box-shadow] duration-200 hover:scale-105 hover:shadow-[0_8px_35px_rgba(245,154,22,0.35)] motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB52A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
-    >
-      <FaWhatsapp aria-hidden="true" className="text-2xl" />
-    </a>
   );
 }

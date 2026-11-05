@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+
 import {
   AnimatePresence,
   MotionConfig,
@@ -9,6 +10,7 @@ import {
   useScroll,
   useTransform,
 } from "framer-motion";
+
 import {
   type ChangeEvent,
   type FormEvent,
@@ -18,13 +20,14 @@ import {
   useRef,
   useState,
 } from "react";
+
 import { sendLead } from "@/lib/lead";
 
 /* -------------------------------------------------------------------------- */
-/* Brand configuration                                                        */
+/* BRAND CONFIGURATION                                                        */
 /* -------------------------------------------------------------------------- */
 
-const BRAND = "#F59A16";
+const BRAND = "#FFB52A";
 const GOLD = "#FFB52A";
 const DEEP_ORANGE = "#A85F08";
 const NAVY = "#0A0F17";
@@ -112,7 +115,9 @@ const stagger = {
 };
 
 const rise = {
-  hidden: { y: "105%" },
+  hidden: {
+    y: "105%",
+  },
   show: {
     y: 0,
     transition: {
@@ -139,10 +144,16 @@ const fade = (delay: number) => ({
 });
 
 /* -------------------------------------------------------------------------- */
-/* Illustrated skyline                                                        */
+/* ILLUSTRATED SKYLINE                                                        */
 /* -------------------------------------------------------------------------- */
 
-function Art({ scene, id }: { scene: Scene; id: string }) {
+function Art({
+  scene,
+  id,
+}: {
+  scene: Scene;
+  id: string;
+}) {
   return (
     <svg
       className="absolute inset-0 h-full w-full"
@@ -175,12 +186,27 @@ function Art({ scene, id }: { scene: Scene; id: string }) {
           x2="0"
           y2="1"
         >
-          <stop offset="0%" stopColor="#050505" stopOpacity="0" />
-          <stop offset="100%" stopColor="#050505" stopOpacity=".88" />
+          <stop
+            offset="0%"
+            stopColor="#050505"
+            stopOpacity="0"
+          />
+
+          <stop
+            offset="100%"
+            stopColor="#050505"
+            stopOpacity=".88"
+          />
         </linearGradient>
       </defs>
 
-      <circle cx="600" cy="560" r="300" fill={BRAND} opacity=".12" />
+      <circle
+        cx="600"
+        cy="560"
+        r="300"
+        fill={BRAND}
+        opacity=".12"
+      />
 
       {Array.from({ length: 24 }, (_, index) => {
         const height =
@@ -221,7 +247,7 @@ function Art({ scene, id }: { scene: Scene; id: string }) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Shared input styles                                                        */
+/* INPUT STYLES                                                               */
 /* -------------------------------------------------------------------------- */
 
 const inputClasses =
@@ -255,10 +281,17 @@ function Field({
 }: FieldProps) {
   return (
     <div className="min-w-0">
-      <label htmlFor={id} className={labelClasses}>
+      <label
+        htmlFor={id}
+        className={labelClasses}
+      >
         {label}
+
         {required && (
-          <span className="ml-1 text-[#FFB52A]" aria-hidden="true">
+          <span
+            className="ml-1 text-[#FFB52A]"
+            aria-hidden="true"
+          >
             *
           </span>
         )}
@@ -282,7 +315,7 @@ function Field({
 }
 
 /* -------------------------------------------------------------------------- */
-/* Success state                                                              */
+/* SUCCESS STATE                                                              */
 /* -------------------------------------------------------------------------- */
 
 function SuccessState({
@@ -295,7 +328,10 @@ function SuccessState({
   return (
     <motion.div
       initial={reducedMotion ? false : { opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
       transition={{
         duration: reducedMotion ? 0 : 0.4,
         ease,
@@ -338,7 +374,7 @@ function SuccessState({
 }
 
 /* -------------------------------------------------------------------------- */
-/* Main component                                                             */
+/* MAIN COMPONENT                                                             */
 /* -------------------------------------------------------------------------- */
 
 export default function CinematicHero() {
@@ -351,10 +387,13 @@ export default function CinematicHero() {
   const [categoryOffset, setCategoryOffset] = useState(0);
 
   const sectionRef = useRef<HTMLElement>(null);
+
   const categoryRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
   const nameInputRef = useRef<HTMLInputElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
+  const phoneInputRef = useRef<HTMLInputElement>(null);
+
   const interestInputRef = useRef<HTMLSelectElement>(null);
   const noteInputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -364,6 +403,10 @@ export default function CinematicHero() {
   const formMessageId = useId();
 
   const prefersReducedMotion = useReducedMotion();
+
+  /* ------------------------------------------------------------------------ */
+  /* BACKGROUND SCROLL EFFECT                                                 */
+  /* ------------------------------------------------------------------------ */
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -377,21 +420,23 @@ export default function CinematicHero() {
   );
 
   /* ------------------------------------------------------------------------ */
-  /* Rotate scenes, but respect reduced-motion preferences                   */
+  /* SCENE ROTATION                                                           */
   /* ------------------------------------------------------------------------ */
 
   useEffect(() => {
     if (prefersReducedMotion) return;
 
     const interval = window.setInterval(() => {
-      setSceneIndex((current) => (current + 1) % scenes.length);
+      setSceneIndex(
+        (current) => (current + 1) % scenes.length,
+      );
     }, 7000);
 
     return () => window.clearInterval(interval);
   }, [prefersReducedMotion]);
 
   /* ------------------------------------------------------------------------ */
-  /* Keep the category strip aligned when fonts or viewport change            */
+  /* CATEGORY POSITIONING                                                     */
   /* ------------------------------------------------------------------------ */
 
   useEffect(() => {
@@ -400,8 +445,10 @@ export default function CinematicHero() {
     const measure = () => {
       if (cancelled) return;
 
+      const activeCategory = categoryRefs.current[sceneIndex];
+
       setCategoryOffset(
-        categoryRefs.current[sceneIndex]?.offsetLeft ?? 0,
+        activeCategory?.offsetLeft ?? 0,
       );
     };
 
@@ -409,16 +456,27 @@ export default function CinematicHero() {
 
     document.fonts?.ready.then(measure);
 
+    const observer = new ResizeObserver(measure);
+
+    const category = categoryRefs.current[sceneIndex];
+
+    if (category?.parentElement) {
+      observer.observe(category.parentElement);
+    }
+
     window.addEventListener("resize", measure);
 
     return () => {
       cancelled = true;
+
+      observer.disconnect();
+
       window.removeEventListener("resize", measure);
     };
   }, [sceneIndex]);
 
   /* ------------------------------------------------------------------------ */
-  /* Focus the new form step only after the visitor changes steps              */
+  /* FORM FOCUS MANAGEMENT                                                    */
   /* ------------------------------------------------------------------------ */
 
   useEffect(() => {
@@ -428,11 +486,21 @@ export default function CinematicHero() {
 
     const timer = window.setTimeout(() => {
       if (step === 1) {
-        nameInputRef.current?.focus({ preventScroll: true });
-      } else if (step === 2) {
-        interestInputRef.current?.focus({ preventScroll: true });
-      } else if (step === 3) {
-        noteInputRef.current?.focus({ preventScroll: true });
+        nameInputRef.current?.focus({
+          preventScroll: true,
+        });
+      }
+
+      if (step === 2) {
+        interestInputRef.current?.focus({
+          preventScroll: true,
+        });
+      }
+
+      if (step === 3) {
+        noteInputRef.current?.focus({
+          preventScroll: true,
+        });
       }
     }, 80);
 
@@ -440,7 +508,7 @@ export default function CinematicHero() {
   }, [step]);
 
   /* ------------------------------------------------------------------------ */
-  /* Form helpers                                                             */
+  /* FORM HELPERS                                                             */
   /* ------------------------------------------------------------------------ */
 
   const updateField = useCallback(
@@ -456,9 +524,9 @@ export default function CinematicHero() {
         [key]: event.target.value,
       }));
 
-      if (message) setMessage("");
+      setMessage("");
     },
-    [message],
+    [],
   );
 
   const goTo = useCallback((id: string) => {
@@ -476,6 +544,49 @@ export default function CinematicHero() {
     });
   }, []);
 
+  /* ------------------------------------------------------------------------ */
+  /* VALIDATION                                                               */
+  /* ------------------------------------------------------------------------ */
+
+  const validateStepOne = () => {
+    if (!data.name.trim()) {
+      setMessage("Please enter your full name.");
+
+      nameInputRef.current?.focus();
+
+      return false;
+    }
+
+    if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        data.email.trim(),
+      )
+    ) {
+      setMessage("Please enter a valid email address.");
+
+      emailInputRef.current?.focus();
+
+      return false;
+    }
+
+    if (
+      data.phone.trim() &&
+      !/^\+?[0-9\s().-]{7,20}$/.test(data.phone.trim())
+    ) {
+      setMessage("Please enter a valid phone number.");
+
+      phoneInputRef.current?.focus();
+
+      return false;
+    }
+
+    return true;
+  };
+
+  /* ------------------------------------------------------------------------ */
+  /* FORM SUBMISSION                                                          */
+  /* ------------------------------------------------------------------------ */
+
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>,
   ) => {
@@ -485,33 +596,25 @@ export default function CinematicHero() {
 
     setMessage("");
 
-    /* Step 1: validate contact information. */
+    /* STEP 1 */
 
     if (step === 1) {
-      if (!data.name.trim()) {
-        setMessage("Please enter your full name.");
-        nameInputRef.current?.focus();
-        return;
-      }
-
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
-        setMessage("Please enter a valid email address.");
-        emailInputRef.current?.focus();
-        return;
-      }
+      if (!validateStepOne()) return;
 
       setStep(2);
+
       return;
     }
 
-    /* Step 2: capture the visitor's interest. */
+    /* STEP 2 */
 
     if (step === 2) {
       setStep(3);
+
       return;
     }
 
-    /* Step 3: submit through the existing lead API. */
+    /* STEP 3 */
 
     setIsSubmitting(true);
 
@@ -537,14 +640,25 @@ export default function CinematicHero() {
     }
   };
 
+  /* ------------------------------------------------------------------------ */
+  /* RESET FORM                                                               */
+  /* ------------------------------------------------------------------------ */
+
   const resetForm = () => {
     setData(initialLead);
+
     setMessage("");
+
     setIsSubmitting(false);
+
     setStep(1);
   };
 
   const currentScene = scenes[sceneIndex];
+
+  /* ------------------------------------------------------------------------ */
+  /* RENDER                                                                   */
+  /* ------------------------------------------------------------------------ */
 
   return (
     <MotionConfig reducedMotion="user">
@@ -554,9 +668,9 @@ export default function CinematicHero() {
         aria-labelledby="misa-hero-title"
         className="relative isolate overflow-clip bg-[#050505] text-[#F5F5F5] selection:bg-[#FFB52A] selection:text-[#050505]"
       >
-        {/* ================================================================== */}
-        {/* CINEMATIC BACKGROUND                                               */}
-        {/* ================================================================== */}
+        {/* ================================================================ */}
+        {/* CINEMATIC BACKGROUND                                              */}
+        {/* ================================================================ */}
 
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-[100svh] min-h-[620px] overflow-hidden"
@@ -568,11 +682,16 @@ export default function CinematicHero() {
             }}
             className="absolute inset-0"
           >
-            <AnimatePresence initial={false} mode="sync">
+            <AnimatePresence
+              initial={false}
+              mode="sync"
+            >
               <motion.div
                 key={sceneIndex}
                 className="absolute inset-0"
-                style={{ background: currentScene.sky }}
+                style={{
+                  background: currentScene.sky,
+                }}
                 initial={
                   prefersReducedMotion
                     ? { opacity: 0 }
@@ -587,7 +706,9 @@ export default function CinematicHero() {
                   scale: 1,
                   filter: "blur(0px)",
                 }}
-                exit={{ opacity: 0 }}
+                exit={{
+                  opacity: 0,
+                }}
                 transition={{
                   duration: prefersReducedMotion ? 0 : 1.15,
                   ease,
@@ -600,6 +721,7 @@ export default function CinematicHero() {
                     fill
                     priority={sceneIndex === 0}
                     sizes="100vw"
+                    quality={85}
                     className="object-cover"
                     style={{
                       objectPosition:
@@ -616,7 +738,7 @@ export default function CinematicHero() {
             </AnimatePresence>
           </motion.div>
 
-          {/* Contrast layers keep the content legible over every scene. */}
+          {/* IMAGE CONTRAST */}
 
           <div className="absolute inset-0 bg-[#050505]/45" />
 
@@ -627,15 +749,17 @@ export default function CinematicHero() {
           <div className="absolute -left-40 top-1/3 h-[400px] w-[400px] rounded-full bg-[#A85F08]/10 blur-[140px] sm:h-[500px] sm:w-[500px]" />
         </div>
 
-        {/* ================================================================== */}
-        {/* HERO CONTENT                                                       */}
-        {/* ================================================================== */}
+        {/* ================================================================ */}
+        {/* HERO CONTENT                                                      */}
+        {/* ================================================================ */}
 
         <div className="relative z-10 pt-8 sm:pt-12">
           <div className="mx-auto grid w-full max-w-[1500px] content-center items-center gap-12 px-5 pb-14 pt-12 sm:gap-14 sm:px-8 sm:pb-20 sm:pt-16 lg:grid-cols-[1.12fr_0.88fr] lg:gap-16 lg:px-12 lg:py-20 xl:px-16">
-            {/* LEFT: BRAND MESSAGE */}
+
+            {/* LEFT COLUMN */}
 
             <div className="min-w-0 max-w-[800px]">
+
               <motion.div
                 {...fade(0.1)}
                 className="flex items-center gap-3 sm:gap-4"
@@ -643,9 +767,11 @@ export default function CinematicHero() {
                 <span className="h-px w-8 shrink-0 bg-[#FFB52A] sm:w-12" />
 
                 <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-[#FFB52A] sm:text-[10px] sm:tracking-[0.28em]">
-                  property advisory
+                  Property advisory
                 </span>
               </motion.div>
+
+              {/* MAIN HEADLINE */}
 
               <motion.h1
                 id="misa-hero-title"
@@ -666,9 +792,9 @@ export default function CinematicHero() {
                 <span className="block overflow-hidden pb-1">
                   <motion.span
                     variants={rise}
-                    className="block text-[#F5F5F5]/65"
+                    className="block text-[#FAFAFA]/65"
                   >
-                    brokered
+                    Brokered
                   </motion.span>
                 </span>
 
@@ -677,12 +803,17 @@ export default function CinematicHero() {
                     variants={rise}
                     className="block text-[#F5F5F5]"
                   >
-                    across
+                    Across
                   </motion.span>
                 </span>
 
+                {/* CATEGORY SLIDER */}
+
                 <span className="mt-4 block overflow-hidden pb-2 sm:mt-4">
-                  <motion.span variants={rise} className="block">
+                  <motion.span
+                    variants={rise}
+                    className="block"
+                  >
                     <span className="sr-only">
                       Nigeria: residential, commercial, land and
                       developments.
@@ -723,16 +854,18 @@ export default function CinematicHero() {
                 </span>
               </motion.h1>
 
+              {/* DESCRIPTION */}
+
               <motion.p
                 {...fade(0.45)}
                 className="mt-6 max-w-xl text-sm leading-7 text-[#A7AFBF] sm:mt-8 sm:text-base sm:leading-8 md:text-lg"
               >
-                A commission-led property agency connecting discerning
-                buyers, investors and developers with opportunities
-                across Nigeria.
+                A commission-led property agency connecting
+                discerning buyers, investors and developers
+                with opportunities across Nigeria.
               </motion.p>
 
-              {/* Primary actions */}
+              {/* ACTION BUTTONS */}
 
               <motion.div
                 {...fade(0.6)}
@@ -762,7 +895,7 @@ export default function CinematicHero() {
                 </button>
               </motion.div>
 
-              {/* Trust indicators */}
+              {/* TRUST INDICATORS */}
 
               <motion.div
                 {...fade(0.8)}
@@ -795,14 +928,18 @@ export default function CinematicHero() {
               </motion.div>
             </div>
 
-            {/* RIGHT: PRIVATE CLIENT ENQUIRY */}
+            {/* ============================================================ */}
+            {/* RIGHT COLUMN: ENQUIRY FORM                                    */}
+            {/* ============================================================ */}
 
             <motion.div
               {...fade(0.35)}
               className="flex min-w-0 justify-center lg:justify-end"
             >
               <div className="w-full max-w-[470px]">
+
                 <div className="relative overflow-hidden border border-[#252D3A] bg-[#0D121B]/95 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.42)] backdrop-blur-2xl sm:p-8">
+
                   <div
                     className="absolute left-0 top-0 h-px w-24 bg-[#FFB52A]"
                     aria-hidden="true"
@@ -812,6 +949,8 @@ export default function CinematicHero() {
                     <SuccessState onReset={resetForm} />
                   ) : (
                     <>
+                      {/* FORM HEADER */}
+
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <p className="text-[9px] font-medium uppercase tracking-[0.22em] text-[#FFB52A] sm:text-[10px]">
@@ -828,8 +967,8 @@ export default function CinematicHero() {
                           </h2>
 
                           <p className="mt-3 max-w-xs text-xs leading-6 text-[#A7AFBF]">
-                            Tell us what you are looking for. We will
-                            help you explore your options.
+                            Tell us what you are looking for.
+                            We will help you explore your options.
                           </p>
                         </div>
 
@@ -841,7 +980,7 @@ export default function CinematicHero() {
                         </span>
                       </div>
 
-                      {/* Progress indicator */}
+                      {/* PROGRESS */}
 
                       <div
                         className="mt-7 flex gap-1.5"
@@ -863,6 +1002,8 @@ export default function CinematicHero() {
                         ))}
                       </div>
 
+                      {/* FORM */}
+
                       <form
                         className="mt-7"
                         onSubmit={handleSubmit}
@@ -872,7 +1013,10 @@ export default function CinematicHero() {
                         }
                         noValidate
                       >
-                        <AnimatePresence mode="wait" initial={false}>
+                        <AnimatePresence
+                          mode="wait"
+                          initial={false}
+                        >
                           <motion.div
                             key={step}
                             initial={
@@ -880,7 +1024,10 @@ export default function CinematicHero() {
                                 ? { opacity: 0 }
                                 : { opacity: 0, x: 14 }
                             }
-                            animate={{ opacity: 1, x: 0 }}
+                            animate={{
+                              opacity: 1,
+                              x: 0,
+                            }}
                             exit={
                               prefersReducedMotion
                                 ? { opacity: 0 }
@@ -892,6 +1039,8 @@ export default function CinematicHero() {
                             }}
                             className="grid gap-4"
                           >
+                            {/* STEP 1 */}
+
                             {step === 1 && (
                               <>
                                 <Field
@@ -913,6 +1062,7 @@ export default function CinematicHero() {
                                   onChange={updateField("phone")}
                                   placeholder="+234 800 000 0000"
                                   autoComplete="tel"
+                                  inputRef={phoneInputRef}
                                 />
 
                                 <Field
@@ -928,6 +1078,8 @@ export default function CinematicHero() {
                                 />
                               </>
                             )}
+
+                            {/* STEP 2 */}
 
                             {step === 2 && (
                               <div>
@@ -964,6 +1116,8 @@ export default function CinematicHero() {
                               </div>
                             )}
 
+                            {/* STEP 3 */}
+
                             {step === 3 && (
                               <div>
                                 <label
@@ -992,7 +1146,8 @@ export default function CinematicHero() {
                             )}
                           </motion.div>
                         </AnimatePresence>
-                        {/* Validation and submission messages */}
+
+                        {/* ERROR MESSAGE */}
 
                         {message && (
                           <p
@@ -1005,7 +1160,7 @@ export default function CinematicHero() {
                           </p>
                         )}
 
-                        {/* Form navigation */}
+                        {/* FORM NAVIGATION */}
 
                         <div className="mt-6 flex items-center justify-between gap-3 border-t border-[#252D3A] pt-5">
                           {step > 1 ? (
@@ -1014,6 +1169,7 @@ export default function CinematicHero() {
                               disabled={isSubmitting}
                               onClick={() => {
                                 setMessage("");
+
                                 setStep((current) => current - 1);
                               }}
                               className="min-h-11 px-1 text-[10px] uppercase tracking-[0.14em] text-[#A7AFBF] transition-colors hover:text-[#F5F5F5] disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A]"
@@ -1057,9 +1213,9 @@ export default function CinematicHero() {
             </motion.div>
           </div>
 
-          {/* ================================================================= */}
-          {/* SCROLL INDICATOR                                                  */}
-          {/* ================================================================= */}
+          {/* ================================================================ */}
+          {/* SCROLL INDICATOR                                                 */}
+          {/* ================================================================ */}
 
           <button
             type="button"
@@ -1067,58 +1223,93 @@ export default function CinematicHero() {
             className="mx-auto mb-8 hidden min-h-11 items-center gap-4 text-[9px] uppercase tracking-[0.28em] text-[#A7AFBF] transition-colors hover:text-[#F5F5F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A] lg:flex"
           >
             <span>Discover</span>
+
             <span
               className="h-10 w-px bg-[#252D3A]"
               aria-hidden="true"
             />
+
             <span aria-hidden="true">↓</span>
           </button>
 
-          {/* ================================================================= */}
-          {/* ABOUT MISA                                                        */}
-          {/* ================================================================= */}
+          {/* ================================================================ */}
+          {/* ABOUT MISA                                                       */}
+          {/* ================================================================ */}
 
-          <div className="relative border-t border-[#252D3A] bg-gradient-to-b from-[#050505] via-[#0A0F17] to-[#0A0F17] px-5 pb-16 pt-16 sm:px-8 sm:pb-20 sm:pt-24 lg:px-12 lg:pb-28 xl:px-16">
+          <div className="relative overflow-hidden border-t border-[#252D3A] bg-gradient-to-br from-[#F5F5F5] via-[#E7E7E7] to-[#B8B8B8] px-5 pb-16 pt-16 sm:px-8 sm:pb-20 sm:pt-24 lg:px-12 lg:pb-28 xl:px-16">
+
             <motion.div
               initial={
                 prefersReducedMotion
                   ? false
-                  : { opacity: 0, y: 20 }
+                  : {
+                      opacity: 0,
+                      y: 20,
+                    }
               }
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+              }}
+              viewport={{
+                once: true,
+                amount: 0.25,
+              }}
               transition={{
                 duration: prefersReducedMotion ? 0 : 0.7,
                 ease,
               }}
               className="mx-auto max-w-[1500px]"
             >
-              <div className="max-w-4xl">
-                <h2 className="mb-5 flex items-center gap-2 border-b-2 w-40 border-[#FFB52A] font-serif text-3xl font-normal py-2 px-2 items-center tracking-[-0.03em] text-[#F5F5F5] tracking-tighter sm:text-4xl">
-                  <span
-                    className="h-2 w-2shrink-0 rounded-full bg-[#FFB52A]"
-                    aria-hidden="true"
-                  />
-                  MISA <span className="text-[#FFB52A]">NG</span>
+              <div className="max-w-5xl">
+
+                {/* SECTION LABEL */}
+
+                <div className="mb-7 flex items-center gap-3">
+                  <span className="h-2 w-2 shrink-0 rounded-full bg-[#F59A16]" />
+
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#737B89]">
+                    Who we are
+                  </span>
+                </div>
+
+                {/* HEADING */}
+
+                <h2 className="inline-flex items-center gap-2 border-b-2 border-[#FFB52A] pb-3 font-serif text-3xl font-normal tracking-[-0.04em] text-[#050505] sm:text-4xl md:text-5xl">
+                  MISA
+
+                  <span className="text-[#A85F08]">
+                    NG
+                  </span>
                 </h2>
 
-                <p className="font-serif text-xl font-normal leading-relaxed text-[#F5F5F5] sm:text-2xl md:text-3xl">
+                {/* DESCRIPTION */}
+
+                <p className="mt-7 max-w-4xl font-serif text-xl font-normal leading-relaxed tracking-[-0.02em] text-[#171717] sm:text-2xl md:text-3xl">
                   We list verified properties, onboard developers
                   and structure investments across residential,
-                  commercial and land. As part of Strategic
-                  Infrastructure and Resource Partners (SIR-Partners),
-                  we operate on a commission basis, with commissions
-                  payable upon completed transactions under agreed terms.
+                  commercial and land.
+
+                  <span className="text-[#737B89]">
+                    {" "}
+                    As part of Strategic Infrastructure and
+                    Resource Partners (SIR-Partners), we operate
+                    on a commission basis, with commissions
+                    payable upon completed transactions under
+                    agreed terms.
+                  </span>
                 </p>
+
+                {/* LEARN MORE */}
 
                 <button
                   type="button"
                   onClick={() => goTo("invest")}
-                  className="group mt-8 inline-flex min-h-11 items-center gap-4 text-xs text-[#A7AFBF] transition-colors hover:text-[#F5F5F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A]"
+                  className="group mt-9 inline-flex min-h-12 items-center gap-5 text-xs font-medium uppercase tracking-[0.12em] text-[#050505] transition-colors hover:text-[#A85F08] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#A85F08]"
                 >
                   Learn more
 
-                  <span className="grid h-8 w-8 rotate-45 place-items-center bg-[#FFB52A] text-[#050505] transition-transform duration-200 group-hover:scale-105">
+                  <span className="grid h-9 w-9 rotate-45 place-items-center bg-[#FFB52A] text-[#050505] transition-transform duration-300 group-hover:scale-110">
                     <svg
                       viewBox="0 0 24 24"
                       className="h-3.5 w-3.5 -rotate-45"
@@ -1137,9 +1328,9 @@ export default function CinematicHero() {
           </div>
         </div>
 
-        {/* ================================================================== */}
-        {/* GLOBAL REDUCED-MOTION SUPPORT                                      */}
-        {/* ================================================================== */}
+        {/* ================================================================ */}
+        {/* REDUCED MOTION                                                    */}
+        {/* ================================================================ */}
 
         <style jsx global>{`
           @media (prefers-reduced-motion: reduce) {

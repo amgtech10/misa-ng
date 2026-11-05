@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
+import Footer from "@/components/Footer";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 const serif = Fraunces({
   subsets: ["latin"],
@@ -33,7 +35,10 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
-      <body>{children}</body>
+      <body>{children}
+  <WhatsAppButton />
+
+      </body>
     </html>
   );
 }

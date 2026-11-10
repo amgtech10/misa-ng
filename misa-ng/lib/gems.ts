@@ -3,7 +3,7 @@
 export type Gem = {
   id: string;
   name: string;
-  category: "Diamond" | "Emerald" | "Ruby" | "Sapphire" | "Other";
+  category: "Gemstone" | "Mineral" | "Precious Metal";
   origin: string;
   price: string;
   detail: string;
@@ -15,80 +15,74 @@ export type Gem = {
 export const gems: Gem[] = [
   {
     id: "1",
-    name: "Royal Blue Sapphire",
-    category: "Sapphire",
-    origin: "Sri Lanka",
+    name: "Sapphire",
+    category: "Gemstone",
+    origin: "Origin available on request",
     price: "Price on request",
-    detail: "Natural blue sapphire",
+    detail: "Natural sapphire gemstone",
     blurb:
-      "A striking blue gemstone prized for its rich colour and timeless elegance.",
+      "A precious gemstone admired for its captivating blue colour, brilliance, and timeless appeal.",
     tone: "#142B5C",
-    image:
-      "https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=1600&q=85",
+    image: "/images/gems/sapphire.jpg",
   },
   {
     id: "2",
-    name: "Colombian Emerald",
-    category: "Emerald",
+    name: "Unprocessed Sapphire",
+    category: "Gemstone",
     origin: "Colombia",
     price: "Price on request",
-    detail: "Natural green emerald",
+    detail: "Natural unprocessed sapphire",
     blurb:
-      "A vibrant green gemstone celebrated for its distinctive colour and luxurious appeal.",
+      "A naturally occurring sapphire in its raw form, showcasing the beauty and character of an uncut gemstone.",
     tone: "#075E43",
-    image:
-      "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1600&q=85",
+    image: "/images/gems/unprocessed-sapphire.jpg",
   },
   {
     id: "3",
-    name: "Ruby Elegance",
-    category: "Ruby",
-    origin: "Mozambique",
+    name: "Lithium",
+    category: "Mineral",
+    origin: "Origin available on request",
     price: "Price on request",
-    detail: "Natural red ruby",
+    detail: "Lithium mineral",
     blurb:
-      "A bold red gemstone associated with passion, rarity, and classic jewellery design.",
+      "A valuable mineral resource with significant applications in modern energy storage and advanced technologies.",
     tone: "#8B1538",
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1600&q=85",
+    image: "/images/gems/lithium.jpg",
   },
   {
     id: "4",
-    name: "Brilliant Diamond",
-    category: "Diamond",
+    name: "Raw Lithium",
+    category: "Mineral",
     origin: "Origin available on request",
     price: "Price on request",
-    detail: "Diamond collection",
+    detail: "Unprocessed lithium mineral",
     blurb:
-      "A brilliant gemstone selected for its sparkle and timeless sophistication.",
+      "Unprocessed lithium-bearing material representing an important resource for industrial and energy applications.",
     tone: "#A7B4C2",
-    image:
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=1600&q=85",
+    image: "/images/gems/lithium-raw.jpg",
   },
   {
     id: "5",
-    name: "Golden Citrine",
-    category: "Other",
-    origin: "Origin available on request",
+    name: "Beryllium",
+    category: "Mineral",
+    origin: "Mozambique",
     price: "Price on request",
-    detail: "Golden citrine gemstone",
+    detail: "Beryllium mineral",
     blurb:
-      "A warm golden gemstone with a luminous appearance and distinctive character.",
+      "A rare and valuable mineral resource recognised for its importance in specialised industrial and technological applications.",
     tone: "#B7791F",
-    image:
-      "https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=1600&q=85",
+    image: "/images/gems/beryllium.jpg",
   },
   {
     id: "6",
-    name: "Amethyst Collection",
-    category: "Other",
+    name: "Gold",
+    category: "Precious Metal",
     origin: "Origin available on request",
     price: "Price on request",
-    detail: "Purple amethyst gemstone",
+    detail: "Natural gold",
     blurb:
-      "A captivating purple gemstone suited to elegant jewellery and collector collections.",
-    tone: "#68449A",
-    image:
-      "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&w=1600&q=85",
+      "A highly sought-after precious metal valued for its rarity, enduring worth, and importance in investment and jewellery.",
+    tone: "#D4A017",
+    image: "/images/gems/gold.jpg",
   },
-]; 
+];

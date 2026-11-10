@@ -25,15 +25,15 @@ const COLORS = {
 
 const highlights = [
   {
-    number: "01",
+    number: "I",
     label: "Natural beauty",
   },
   {
-    number: "02",
+    number: "II",
     label: "Exceptional colour",
   },
   {
-    number: "03",
+    number: "III",
     label: "Timeless elegance",
   },
 ];

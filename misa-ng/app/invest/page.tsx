@@ -811,7 +811,7 @@ export default function InvestPage() {
                   </button>
 
                   <p className="mt-4 text-center text-[10px] leading-5 text-[#737B89]">
-                    By submitting this form, you agree that MISA NG may use
+                    By submitting this form, you agree that MISA may use
                     the details provided to respond to your enquiry.
                     Submission does not constitute an investment commitment
                     or guarantee of property availability.
@@ -849,7 +849,7 @@ export default function InvestPage() {
             href="/"
             className="inline-flex min-h-8 items-center self-start text-[9px] uppercase tracking-[0.15em] text-[#A7AFBF] transition-colors hover:text-[#FFB52A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A] motion-reduce:transition-none sm:self-auto"
           >
-            Return to MISA NG →
+            Return to MISA →
           </Link>
         </div>
       </footer>

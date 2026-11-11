@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import LeadForm from '@/components/LeadForm';
 const pages: Record<string, { t: string; p: string[]; form?: boolean }> = {
-  about: { t: 'About MISA NG LTD', p: ['Municipal Integrated Service Agent NG Ltd (MISA NG LTD) is part of Strategic Infrastructure and Resource Partners (SIR-Partners).', 'We are a commission agency. We list verified properties, publish real estate and finance news, onboard developers and introduce investors to suitable opportunities.'] },
+  about: { t: 'About MISA LTD', p: ['Municipal Integrated Service Agent (MISA LTD) is part of Strategic Infrastructure and Resource Partners (SIR-Partners).', 'We are a commission agency. We list verified properties, publish real estate and finance news, onboard developers and introduce investors to suitable opportunities.'] },
   contact: { t: 'Contact us', p: ['Send a message and an advisor will reply by email or phone.'], form: true },
   privacy: { t: 'Privacy', p: ['Replace this placeholder with your counsel-reviewed privacy policy. Enquiries submitted on this site are stored so MISA can respond.'] },
   terms: { t: 'Terms', p: ['Replace this placeholder with your counsel-reviewed terms of use.'] },

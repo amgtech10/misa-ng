@@ -78,16 +78,13 @@ export default function Footer() {
           <div className="max-w-md">
             <Link
               href="/"
-              aria-label="MISA NG LTD home"
+              aria-label="MISA LTD home"
               className={`inline-flex flex-col ${focusStyles}`}
             >
               <span className="font-serif text-4xl leading-none tracking-[-0.06em] text-[#F5F5F5] sm:text-5xl">
                 MISA<span className="text-[#FFB25A]">.</span>
               </span>
 
-              <span className="mt-2 pl-1 text-[9px] font-medium uppercase tracking-[0.3em] text-[#FFB25A]">
-                NG LTD
-              </span>
             </Link>
 
             <p className="mt-5 max-w-sm text-[13px] leading-7 text-[#A7AFBF] sm:text-sm">
@@ -157,12 +154,12 @@ export default function Footer() {
               </h2>
 
               <p className="mt-2 text-[13px] leading-6 text-[#737B89]">
-                Connect with MISA NG LTD.
+                Connect with MISA LTD.
               </p>
             </div>
 
             <div
-              aria-label="MISA NG LTD social media"
+              aria-label="MISA LTD social media"
               className="flex flex-wrap items-center gap-3"
             >
               {socialLinks.map(({ name, href, Icon }) => (
@@ -207,7 +204,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-8 flex flex-col gap-3 border-t border-[#252D3A] pt-5 sm:mt-10 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:pt-6">
           <p className="text-[11px] leading-5 text-[#737B89]">
-            © {year} MISA NG LTD. All rights reserved.
+            © {year} MISA LTD. All rights reserved.
           </p>
 
           <p className="text-[9px] font-medium uppercase leading-5 tracking-[0.16em] text-[#737B89] sm:text-right">

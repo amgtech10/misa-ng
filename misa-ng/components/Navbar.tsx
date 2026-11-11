@@ -1,36 +1,32 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Building2,
   Gem,
   Users,
   TrendingUp,
-  ArrowLeftRight,
   Newspaper,
   Mail,
   Menu,
   X,
   ArrowUpRight,
+  BarChart3,
 } from "lucide-react";
 
 import { openLead } from "@/lib/lead";
+import CountrySelector from "@/components/CountrySelector";
 
 const links = [
   {
     label: "Properties",
-    href: "/#properties",
+    href: "/properties",
     icon: Building2,
   },
   {
     label: "Gems",
     href: "/gems",
-    icon: Gem,
-  },
-  {
-    label: "Developers",
-    href: "/#developers",
     icon: Users,
   },
   {
@@ -39,309 +35,225 @@ const links = [
     icon: TrendingUp,
   },
   {
-    label: "Exchange",
+    label: "Markets",
     href: "/markets",
-    icon: ArrowLeftRight,
+    icon: BarChart3,
   },
   {
-    label: "News",
-    href: "/#newsfeed",
+    label: "Intelligence",
+    href: "#newsfeed",
     icon: Newspaper,
   },
   {
     label: "Contact",
-    href: "/#contact",
+    href: "#contact",
     icon: Mail,
   },
 ];
-
-const actionButtonClasses =
-  "inline-flex min-h-11 items-center justify-center gap-2 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB52A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0F17] motion-reduce:transition-none";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
-  // ---------------------------------------------------------------------------
-  // Scroll-aware header
-  // ---------------------------------------------------------------------------
-
+  // Detect page scroll
   useEffect(() => {
-    let ticking = false;
-
-    const updateScrollState = () => {
-      if (ticking) return;
-
-      ticking = true;
-
-      window.requestAnimationFrame(() => {
-        setScrolled(window.scrollY > 24);
-        ticking = false;
-      });
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 30);
     };
 
-    updateScrollState();
+    handleScroll();
 
-    window.addEventListener("scroll", updateScrollState, {
+    window.addEventListener("scroll", handleScroll, {
       passive: true,
     });
 
     return () => {
-      window.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
-  // ---------------------------------------------------------------------------
-  // Close mobile navigation
-  // ---------------------------------------------------------------------------
-
-  const closeMobileMenu = useCallback((restoreFocus = false) => {
+  // Close mobile menu and restore focus
+  const closeMobileMenu = () => {
     setMobileOpen(false);
+    menuButtonRef.current?.focus();
+  };
 
-    if (restoreFocus) {
-      window.requestAnimationFrame(() => {
-        menuButtonRef.current?.focus();
-      });
-    }
-  }, []);
-
-  // ---------------------------------------------------------------------------
-  // Mobile menu keyboard accessibility and scroll locking
-  // ---------------------------------------------------------------------------
-
+  // Lock body scrolling while mobile menu is open
   useEffect(() => {
     if (!mobileOpen) return;
 
     const previousOverflow = document.body.style.overflow;
-    const previousPaddingRight = document.body.style.paddingRight;
-
-    const scrollbarWidth =
-      window.innerWidth - document.documentElement.clientWidth;
 
     document.body.style.overflow = "hidden";
 
-    if (scrollbarWidth > 0) {
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
-    }
-
-    const frame = window.requestAnimationFrame(() => {
-      const firstLink =
-        mobileMenuRef.current?.querySelector<HTMLAnchorElement>(
-          "a[href]",
-        );
-
-      firstLink?.focus();
-    });
-
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        event.preventDefault();
-        closeMobileMenu(true);
-        return;
+        closeMobileMenu();
       }
 
-      if (event.key !== "Tab") return;
+      // Basic keyboard focus management
+      if (event.key === "Tab" && menuRef.current) {
+        const focusableElements =
+          menuRef.current.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), select:not([disabled]), input:not([disabled])'
+          );
 
-      const menu = mobileMenuRef.current;
+        const firstElement = focusableElements[0];
+        const lastElement =
+          focusableElements[focusableElements.length - 1];
 
-      if (!menu) return;
+        if (!firstElement || !lastElement) return;
 
-      const focusableElements = Array.from(
-        menu.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        ),
-      ).filter((element) => {
-        return (
-          element.getAttribute("aria-hidden") !== "true" &&
-          !element.hasAttribute("disabled")
-        );
-      });
-
-      if (focusableElements.length === 0) return;
-
-      const firstElement = focusableElements[0];
-      const lastElement = focusableElements[focusableElements.length - 1];
-
-      if (
-        event.shiftKey &&
-        document.activeElement === firstElement
-      ) {
-        event.preventDefault();
-        lastElement.focus();
-      } else if (
-        !event.shiftKey &&
-        document.activeElement === lastElement
-      ) {
-        event.preventDefault();
-        firstElement.focus();
+        if (
+          event.shiftKey &&
+          document.activeElement === firstElement
+        ) {
+          event.preventDefault();
+          lastElement.focus();
+        } else if (
+          !event.shiftKey &&
+          document.activeElement === lastElement
+        ) {
+          event.preventDefault();
+          firstElement.focus();
+        }
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    // Focus first menu link when opened
+    const firstLink =
+      menuRef.current?.querySelector<HTMLElement>("a[href]");
+
+    firstLink?.focus();
 
     return () => {
-      window.cancelAnimationFrame(frame);
-
-      window.removeEventListener("keydown", handleKeyDown);
-
       document.body.style.overflow = previousOverflow;
-      document.body.style.paddingRight = previousPaddingRight;
+      document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [mobileOpen, closeMobileMenu]);
+  }, [mobileOpen]);
 
-  // ---------------------------------------------------------------------------
-  // Close mobile menu when switching to desktop
-  // ---------------------------------------------------------------------------
-
+  // Close menu when screen becomes desktop-sized
   useEffect(() => {
-    const desktopQuery = window.matchMedia("(min-width: 1280px)");
-
-    const handleBreakpointChange = (
-      event: MediaQueryListEvent,
-    ) => {
-      if (event.matches) {
+    const handleResize = () => {
+      if (window.innerWidth >= 1280 && mobileOpen) {
         setMobileOpen(false);
       }
     };
 
-    desktopQuery.addEventListener("change", handleBreakpointChange);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      desktopQuery.removeEventListener(
-        "change",
-        handleBreakpointChange,
-      );
+      window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [mobileOpen]);
 
-  // ---------------------------------------------------------------------------
-  // Lead actions
-  // ---------------------------------------------------------------------------
-
-  const openLeadFromMenu = (type: string) => {
-    closeMobileMenu();
-    openLead(type);
+  const handleNavigation = () => {
+    setMobileOpen(false);
   };
 
-  // ---------------------------------------------------------------------------
-  // Navigation link styling
-  // ---------------------------------------------------------------------------
+  const handleRegistration = () => {
+    setMobileOpen(false);
+    openLead("Registration");
+  };
 
-  const desktopLinkClasses =
-    "group inline-flex min-h-10 items-center justify-center gap-1.5 px-2.5 text-[11px] font-medium text-[#A7AFBF] transition-colors duration-200 hover:text-[#FFB52A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#FFB52A] 2xl:gap-2 2xl:px-3 2xl:text-xs motion-reduce:transition-none";
+  const handleDeveloperOnboarding = () => {
+    setMobileOpen(false);
+    openLead("Developer onboarding");
+  };
 
   return (
     <>
-      {/* ===================================================================== */}
-      {/* FIXED HEADER                                                          */}
-      {/* ===================================================================== */}
-
+      {/* NAVBAR */}
       <header
-        className={`fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,box-shadow] duration-300 motion-reduce:transition-none ${
+        className={`fixed inset-x-0 top-0 z-[100] border-b transition-all duration-300 ${
           scrolled
-            ? "border-[#252D3A] bg-[#0A0F17]/95 shadow-[0_8px_32px_rgba(0,0,0,0.24)] backdrop-blur-xl"
-            : "border-transparent bg-[#050505]/70 backdrop-blur-md"
+            ? "border-[#252D3A] bg-[#050505]/95 shadow-[0_8px_35px_rgba(0,0,0,0.35)] backdrop-blur-xl"
+            : "border-white/[0.06] bg-[#050505]/75 backdrop-blur-md"
         }`}
       >
         <nav
-          className="mx-auto flex h-[68px] max-w-[1500px] items-center justify-between gap-3 px-4 min-[390px]:px-5 sm:h-[76px] sm:px-8 lg:px-10 xl:px-12"
           aria-label="Main navigation"
+          className="mx-auto flex h-[68px] max-w-[1600px] items-center justify-between px-5 sm:px-8 lg:h-[76px] lg:px-12"
         >
-          {/* Brand */}
-
+          {/* BRAND */}
           <Link
             href="/"
-            onClick={() => closeMobileMenu()}
-            className="group flex min-w-0 shrink-0 items-center gap-2.5 sm:gap-3"
-            aria-label="MISA NG LTD home"
+            aria-label="MISA NG homepage"
+            onClick={handleNavigation}
+            className="group flex shrink-0 items-center gap-3"
           >
-            <span
-              aria-hidden="true"
-              className="relative flex h-9 w-9 shrink-0 items-center justify-center border border-[#252D3A] font-serif text-lg text-[#F5F5F5] transition-colors duration-200 group-hover:border-[#FFB52A] group-hover:text-[#FFB52A] sm:h-10 sm:w-10"
-            >
-              M
+            <div className="flex h-10 w-10 items-center justify-center border border-[#F59A16]/40 bg-[#F59A16]/10 transition-colors group-hover:bg-[#F59A16]/20">
+              <Gem
+                size={21}
+                strokeWidth={1.5}
+                className="text-[#F59A16]"
+              />
+            </div>
 
-              <span className="absolute -right-px -top-px h-1.5 w-1.5 bg-[#FFB52A]" />
-            </span>
-
-            <span className="min-w-0 leading-none">
-              <span className="block whitespace-nowrap font-serif text-[17px] tracking-[-0.035em] text-[#F5F5F5] sm:text-[19px]">
-                MISA <span className="text-[#FFB52A]">NG</span>
+            <div className="flex flex-col">
+              <span className="text-[17px] font-bold leading-none tracking-[0.16em] text-[#F5F5F5]">
+                MISA <span className="text-[#F59A16]">NG</span>
               </span>
 
-              <span className="mt-1.5 hidden whitespace-nowrap text-[7px] uppercase tracking-[0.18em] text-[#A7AFBF] min-[390px]:block sm:text-[8px] sm:tracking-[0.2em]">
-                Property · Investment · Advisory
+              <span className="mt-1.5 text-[8px] font-medium uppercase tracking-[0.22em] text-[#737B89]">
+                Property & Investment
               </span>
-            </span>
+            </div>
           </Link>
 
-          {/* Desktop navigation */}
+          {/* DESKTOP NAVIGATION */}
+          <div className="hidden items-center gap-7 xl:flex 2xl:gap-9">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={handleNavigation}
+                className="group relative py-2 text-[11px] font-semibold tracking-[0.08em] text-[#A7AFBF] transition-colors hover:text-white"
+              >
+                {link.label}
 
-          <div className="hidden items-center gap-0.5 xl:flex 2xl:gap-1">
-            {links.map((link) => {
-              const Icon = link.icon;
-
-              return (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className={desktopLinkClasses}
-                >
-                  <Icon
-                    size={14}
-                    strokeWidth={1.6}
-                    aria-hidden="true"
-                    className="shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 motion-reduce:transition-none"
-                  />
-
-                  <span>{link.label}</span>
-                </Link>
-              );
-            })}
+                <span className="absolute bottom-0 left-0 h-px w-0 bg-[#F59A16] transition-all duration-300 group-hover:w-full" />
+              </Link>
+            ))}
           </div>
 
-          {/* Desktop actions */}
-
+          {/* DESKTOP ACTIONS */}
           <div className="hidden shrink-0 items-center gap-2 xl:flex 2xl:gap-3">
+            {/* COUNTRY / CURRENCY SELECTOR */}
+            <CountrySelector />
+
             <button
               type="button"
-              onClick={() => openLead("Developer onboarding")}
-              className={`${actionButtonClasses} border border-[#252D3A] text-[#F5F5F5] hover:border-[#FFB52A]/70 hover:text-[#FFB52A]`}
+              onClick={handleDeveloperOnboarding}
+              className="whitespace-nowrap border border-[#252D3A] px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#F5F5F5] transition-all hover:border-[#F59A16] hover:text-[#FFB52A]"
             >
               Partner with us
             </button>
 
             <button
               type="button"
-              onClick={() => openLead("Registration")}
-              className={`${actionButtonClasses} group bg-[#FFB52A] text-[#050505] hover:bg-[#F59A16]`}
+              onClick={handleRegistration}
+              className="group flex items-center gap-2 whitespace-nowrap bg-[#F59A16] px-5 py-3 text-[10px] font-bold uppercase tracking-[0.12em] text-[#050505] transition-all hover:bg-[#FFB52A]"
             >
               Get started
 
               <ArrowUpRight
-                size={15}
-                aria-hidden="true"
-                className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none"
+                size={14}
+                className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
               />
             </button>
           </div>
 
-          {/* Mobile menu toggle */}
-
+          {/* MOBILE MENU BUTTON */}
           <button
             ref={menuButtonRef}
             type="button"
-            onClick={() => {
-              if (mobileOpen) {
-                closeMobileMenu(true);
-              } else {
-                setMobileOpen(true);
-              }
-            }}
-            className="inline-flex h-11 w-11 shrink-0 items-center justify-center border border-[#252D3A] text-[#F5F5F5] transition-colors duration-200 hover:border-[#FFB52A] hover:text-[#FFB52A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB52A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0F17] xl:hidden motion-reduce:transition-none"
+            onClick={() => setMobileOpen((previous) => !previous)}
             aria-label={
               mobileOpen
                 ? "Close navigation menu"
@@ -349,147 +261,116 @@ export default function Navbar() {
             }
             aria-expanded={mobileOpen}
             aria-controls="mobile-navigation"
+            className="flex h-10 w-10 items-center justify-center border border-[#252D3A] text-[#F5F5F5] transition-colors hover:border-[#F59A16] hover:text-[#F59A16] xl:hidden"
           >
             {mobileOpen ? (
-              <X size={20} strokeWidth={1.7} aria-hidden="true" />
+              <X size={20} strokeWidth={1.7} />
             ) : (
-              <Menu size={20} strokeWidth={1.7} aria-hidden="true" />
+              <Menu size={20} strokeWidth={1.7} />
             )}
           </button>
         </nav>
       </header>
 
-      {/* ===================================================================== */}
-      {/* MOBILE NAVIGATION                                                     */}
-      {/* ===================================================================== */}
-
+      {/* MOBILE NAVIGATION */}
       <div
-        ref={mobileMenuRef}
         id="mobile-navigation"
+        ref={menuRef}
         aria-label="Mobile navigation"
         aria-hidden={!mobileOpen}
-        inert={!mobileOpen}
-        className={`fixed inset-0 z-40 overflow-y-auto bg-[#050505] transition-[opacity,visibility] duration-300 ease-out xl:hidden motion-reduce:transition-none ${
+        className={`fixed inset-0 z-[90] overflow-y-auto bg-[#050505] pt-[88px] transition-all duration-300 xl:hidden ${
           mobileOpen
-            ? "visible opacity-100"
-            : "invisible pointer-events-none opacity-0"
+            ? "visible translate-y-0 opacity-100"
+            : "invisible -translate-y-3 opacity-0"
         }`}
       >
-        {/* Atmospheric background */}
-
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-[#0A0F17] to-transparent"
-        />
-
-        <div className="relative flex min-h-full flex-col px-5 pb-8 pt-[100px] min-[390px]:px-6 sm:px-10 sm:pt-[112px]">
-          {/* Introduction */}
-
-          <div className="mb-7 border-b border-[#252D3A] pb-6 sm:mb-8">
-            <p className="flex items-center gap-3 text-[9px] font-medium uppercase tracking-[0.24em] text-[#FFB52A] sm:text-[10px]">
-              <span
-                className="h-px w-7 bg-[#FFB52A]"
-                aria-hidden="true"
-              />
-              Explore MISA
+        <div className="mx-auto flex min-h-full max-w-[600px] flex-col px-6 pb-10 sm:px-10">
+          {/* MOBILE INTRO */}
+          <div className="mb-8 border-b border-[#252D3A] pb-6">
+            <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.25em] text-[#F59A16]">
+              Municipal Integrated Service Agent
             </p>
 
-            <p className="mt-3 max-w-xs font-serif text-2xl leading-snug text-[#F5F5F5] sm:text-3xl">
-              Property.
-              <br />
-              Investment.
-              <br />
-              Opportunity.
-            </p>
-
-            <p className="mt-3 max-w-sm text-xs leading-6 text-[#A7AFBF] sm:text-sm">
-              Property advisory and developer partnerships across Nigeria.
-            </p>
+            <h2 className="max-w-[320px] font-serif text-3xl leading-tight text-[#F5F5F5]">
+              Property opportunities.
+              <span className="text-[#F59A16]">
+                {" "}Strategic partnerships.
+              </span>
+            </h2>
           </div>
 
-          {/* Navigation links */}
+          {/* MOBILE LINKS */}
+          <div className="flex flex-col">
+            {links.map((link, index) => {
+              const Icon = link.icon;
 
-          <nav aria-label="Mobile navigation links">
-            <div className="space-y-1">
-              {links.map((link, index) => {
-                const Icon = link.icon;
-
-                return (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    onClick={() => closeMobileMenu()}
-                    className="group flex min-h-[60px] items-center justify-between border-b border-[#252D3A]/70 py-3 text-[#A7AFBF] transition-colors duration-200 hover:text-[#FFB52A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#FFB52A] motion-reduce:transition-none"
-                    style={{
-                      transitionDelay: mobileOpen
-                        ? `${index * 25}ms`
-                        : "0ms",
-                    }}
-                  >
-                    <span className="flex min-w-0 items-center gap-4">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center border border-[#252D3A] bg-[#0D121B] transition-colors duration-200 group-hover:border-[#FFB52A]/50">
-                        <Icon
-                          size={18}
-                          strokeWidth={1.5}
-                          aria-hidden="true"
-                        />
-                      </span>
-
-                      <span className="text-sm font-medium tracking-[0.01em] sm:text-base">
-                        {link.label}
-                      </span>
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={handleNavigation}
+                  tabIndex={mobileOpen ? 0 : -1}
+                  className="group flex items-center justify-between border-b border-[#252D3A] py-5 transition-colors hover:border-[#F59A16]/50"
+                >
+                  <div className="flex items-center gap-4">
+                    <span className="text-[10px] font-medium text-[#737B89]">
+                      {String(index + 1).padStart(2, "0")}
                     </span>
 
-                    <ArrowUpRight
-                      size={17}
-                      aria-hidden="true"
-                      className="shrink-0 text-[#737B89] transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#FFB52A] motion-reduce:transition-none"
-                    />
-                  </Link>
-                );
-              })}
-            </div>
-          </nav>
+                    <span className="text-base font-medium text-[#F5F5F5] transition-colors group-hover:text-[#FFB52A]">
+                      {link.label}
+                    </span>
+                  </div>
 
-          {/* Mobile actions */}
+                  <div className="flex h-9 w-9 items-center justify-center border border-[#252D3A] text-[#A7AFBF] transition-all group-hover:border-[#F59A16] group-hover:text-[#F59A16]">
+                    <Icon size={16} strokeWidth={1.5} />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
 
-          <div className="mt-7 grid gap-3 sm:grid-cols-2">
+          {/* MOBILE COUNTRY SELECTOR */}
+          <div className="mb-6 mt-8 border border-[#252D3A] bg-[#0D121B] p-4">
+            <p className="mb-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-[#A7AFBF]">
+              Your location & currency
+            </p>
+
+            <CountrySelector />
+          </div>
+
+          {/* MOBILE ACTIONS */}
+          <div className="mt-auto flex flex-col gap-3">
             <button
               type="button"
-              onClick={() =>
-                openLeadFromMenu("Developer onboarding")
-              }
-              className="inline-flex min-h-12 items-center justify-center gap-2 border border-[#252D3A] px-4 py-4 text-[10px] font-medium uppercase tracking-[0.12em] text-[#F5F5F5] transition-colors duration-200 hover:border-[#FFB52A]/70 hover:text-[#FFB52A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB52A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] motion-reduce:transition-none"
+              onClick={handleDeveloperOnboarding}
+              className="flex w-full items-center justify-between border border-[#252D3A] px-5 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[#F5F5F5] transition-colors hover:border-[#F59A16] hover:text-[#FFB52A]"
             >
-              <Users size={16} aria-hidden="true" />
               Partner with us
+
+              <Users size={17} />
             </button>
 
             <button
               type="button"
-              onClick={() => openLeadFromMenu("Registration")}
-              className="group inline-flex min-h-12 items-center justify-center gap-2 bg-[#FFB52A] px-4 py-4 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#050505] transition-colors duration-200 hover:bg-[#F59A16] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFB52A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] motion-reduce:transition-none"
+              onClick={handleRegistration}
+              className="flex w-full items-center justify-between bg-[#F59A16] px-5 py-4 text-[11px] font-bold uppercase tracking-[0.12em] text-[#050505] transition-colors hover:bg-[#FFB52A]"
             >
               Get started
 
-              <ArrowUpRight
-                size={16}
-                aria-hidden="true"
-                className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none"
-              />
+              <ArrowUpRight size={17} />
             </button>
           </div>
 
-          {/* Footer */}
-
-          <div className="mt-auto pt-12">
-            <div className="mb-4 h-px bg-[#252D3A]" />
-
-            <p className="text-center text-[9px] uppercase leading-5 tracking-[0.16em] text-[#737B89] sm:text-[10px] sm:tracking-[0.2em]">
+          {/* MOBILE FOOTER */}
+          <div className="mt-8 flex items-center justify-between border-t border-[#252D3A] pt-5">
+            <span className="text-[9px] uppercase tracking-[0.16em] text-[#737B89]">
               MISA NG LTD
-              <span className="mx-2 text-[#FFB52A]">·</span>
-              Property · Investment · Advisory
-            </p>
+            </span>
+
+            <span className="text-[9px] uppercase tracking-[0.16em] text-[#737B89]">
+              Abuja · Nigeria
+            </span>
           </div>
         </div>
       </div>

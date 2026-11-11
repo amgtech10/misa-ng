@@ -1,5 +1,5 @@
 export function getWhatsAppUrl(
-  message = "Hello MISA NG, I would like to make an enquiry."
+  message = "Hello MISA LTD, I would like to make an enquiry."
 ) {
   const number =
     process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ||

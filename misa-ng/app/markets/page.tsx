@@ -2,6 +2,8 @@
 
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import { useCountryCurrency } from "@/components/CurrencyProvider";
+
 import {
   useCallback,
   useEffect,
@@ -22,20 +24,6 @@ type RateResponse = {
   rates?: Record<string, number>;
   time_last_update_utc?: string;
 };
-
-const COLORS = {
-  background: "#050505",
-  navy: "#0A0F17",
-  panel: "#0D121B",
-  border: "#252D3A",
-  orange: "#F59A16",
-  gold: "#FFB52A",
-  deepOrange: "#A85F08",
-  white: "#F5F5F5",
-  gray: "#A7AFBF",
-  muted: "#737B89",
-  green: "#32D583",
-} as const;
 
 const CURRENCIES: Currency[] = [
   { code: "USD", name: "US Dollar", flag: "🇺🇸" },
@@ -76,7 +64,9 @@ const formatNumber = (
   });
 
 function getCurrency(code: string) {
-  return CURRENCIES.find((currency) => currency.code === code);
+  return CURRENCIES.find(
+    (currency) => currency.code === code,
+  );
 }
 
 const focusRing =
@@ -89,6 +79,12 @@ const panelClass =
   "border border-[#252D3A] bg-[#0D121B]";
 
 export default function ExchangeDashboard() {
+  // Global country and currency settings.
+  const {
+    currency: countryCurrency,
+    country,
+  } = useCountryCurrency();
+
   const [active, setActive] = useState("Dashboard");
   const [base, setBase] = useState("USD");
   const [quote, setQuote] = useState("NGN");
@@ -104,18 +100,29 @@ export default function ExchangeDashboard() {
   const [error, setError] = useState("");
 
   const [search, setSearch] = useState("");
+
   const [dialog, setDialog] = useState<
     "convert" | "support" | "rate" | null
   >(null);
 
-  const [selectedCurrency, setSelectedCurrency] = useState("NGN");
-  const [period, setPeriod] = useState("1M");
+  const [selectedCurrency, setSelectedCurrency] =
+    useState("NGN");
+
   const [tickerPaused, setTickerPaused] = useState(false);
 
   const requestId = useRef(0);
   const dialogCloseRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
+  // Synchronise the receive currency with global selection.
+  useEffect(() => {
+    if (!countryCurrency) return;
+
+    setQuote(countryCurrency);
+    setSelectedCurrency(countryCurrency);
+  }, [countryCurrency]);
+
+  // Fetch exchange rates.
   const loadRates = useCallback(async () => {
     const currentRequest = ++requestId.current;
 
@@ -170,6 +177,7 @@ export default function ExchangeDashboard() {
     }
   }, []);
 
+  // Initial load and automatic refresh every 15 minutes.
   useEffect(() => {
     void loadRates();
 
@@ -183,7 +191,7 @@ export default function ExchangeDashboard() {
     };
   }, [loadRates]);
 
-  // Keep every conversion based on the same USD reference table.
+  // Convert currencies using USD reference rates.
   const convert = useCallback(
     (
       value: number,
@@ -231,6 +239,7 @@ export default function ExchangeDashboard() {
 
   const rate = convert(1, base, quote);
 
+  // Currency table data.
   const rows = useMemo(() => {
     const query = search.trim().toLowerCase();
 
@@ -248,11 +257,17 @@ export default function ExchangeDashboard() {
     }));
   }, [search, base, convert]);
 
+  // Swap currencies.
   const swap = () => {
-    setBase(quote);
-    setQuote(base);
+    const nextBase = quote;
+    const nextQuote = base;
+
+    setBase(nextBase);
+    setQuote(nextQuote);
+    setSelectedCurrency(nextQuote);
   };
 
+  // Dashboard navigation.
   const openNav = (label: string) => {
     setActive(label);
 
@@ -275,6 +290,7 @@ export default function ExchangeDashboard() {
     }
   };
 
+  // Currency ticker data.
   const tickerItems = [
     { pair: "USD / NGN", from: "USD", to: "NGN" },
     { pair: "GBP / USD", from: "GBP", to: "USD" },
@@ -302,7 +318,7 @@ export default function ExchangeDashboard() {
       })
     : "";
 
-  // Basic modal focus management and Escape-key handling.
+  // Dialog keyboard and focus management.
   useEffect(() => {
     if (!dialog) return;
 
@@ -321,8 +337,9 @@ export default function ExchangeDashboard() {
 
       if (event.key !== "Tab") return;
 
-      const dialogElement =
-        document.getElementById("misa-dashboard-dialog");
+      const dialogElement = document.getElementById(
+        "misa-dashboard-dialog",
+      );
 
       if (!dialogElement) return;
 
@@ -369,7 +386,7 @@ export default function ExchangeDashboard() {
   return (
     <main className="min-h-screen bg-[#050505] text-[#F5F5F5]">
       <Navbar />
-      
+
       <style jsx global>{`
         @keyframes misa-ticker {
           from {
@@ -417,7 +434,7 @@ export default function ExchangeDashboard() {
         }
       `}</style>
 
-      {/* Exchange-rate ticker */}
+      {/* Currency reference ticker */}
       <section
         aria-label="Indicative currency reference rates"
         className={`misa-ticker ${
@@ -432,7 +449,9 @@ export default function ExchangeDashboard() {
           <button
             type="button"
             aria-pressed={tickerPaused}
-            onClick={() => setTickerPaused((value) => !value)}
+            onClick={() =>
+              setTickerPaused((value) => !value)
+            }
             className={`${buttonBase} shrink-0 text-[10px] text-[#A7AFBF] hover:text-[#FFB52A]`}
           >
             {tickerPaused ? "Resume ticker" : "Pause ticker"}
@@ -561,7 +580,7 @@ export default function ExchangeDashboard() {
 
           <div className="border-t border-[#252D3A] px-5 py-4">
             <p className="text-[9px] uppercase tracking-[0.12em] text-[#737B89]">
-              MISA NG LTD
+              MISA LTD
             </p>
 
             <p className="mt-1 text-[10px] text-[#A7AFBF]">
@@ -644,6 +663,21 @@ export default function ExchangeDashboard() {
                   A clear view of currency reference rates and
                   estimated conversions.
                 </p>
+
+                {/* Global country selection indicator */}
+                <div className="mt-4 inline-flex max-w-full flex-wrap items-center gap-2 border border-[#252D3A] bg-[#0D121B] px-3 py-2">
+                  <span aria-hidden="true" className="text-base">
+                    {country?.flag ?? "🌍"}
+                  </span>
+
+                  <span className="text-[10px] text-[#A7AFBF]">
+                    Your selected market:
+                  </span>
+
+                  <span className="text-[10px] font-semibold text-[#FFB52A]">
+                    {country?.name ?? "Nigeria"} · {countryCurrency}
+                  </span>
+                </div>
               </div>
 
               <button
@@ -657,7 +691,7 @@ export default function ExchangeDashboard() {
               </button>
             </div>
 
-            {/* Status */}
+            {/* Error status */}
             {error && (
               <div
                 role="alert"
@@ -669,8 +703,7 @@ export default function ExchangeDashboard() {
                   </p>
 
                   <p className="mt-1 text-xs leading-5 text-[#A7AFBF]">
-                    {error} Check your connection and try
-                    again.
+                    {error} Check your connection and try again.
                   </p>
                 </div>
 
@@ -742,272 +775,153 @@ export default function ExchangeDashboard() {
               />
             </section>
 
-            {/* Converter and market illustration */}
-            <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.8fr)]">
-              <section
-                id="currency-converter"
-                className={`${panelClass} scroll-mt-24 p-4 sm:p-6 lg:p-7`}
-              >
-                <div className="mb-7 flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[#FFB52A]">
-                      Currency tools
-                    </p>
-
-                    <h2 className="mt-2 font-serif text-2xl tracking-tight text-[#F5F5F5] sm:text-3xl">
-                      Currency converter
-                    </h2>
-
-                    <p className="mt-2 text-xs leading-5 text-[#A7AFBF]">
-                      Estimate a conversion using the current
-                      reference-rate snapshot.
-                    </p>
-                  </div>
-
-                  <span className="inline-flex min-h-7 items-center gap-2 border border-[#32D583]/20 px-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-[#32D583]">
-                    <span
-                      aria-hidden="true"
-                      className="h-1.5 w-1.5 rounded-full bg-[#32D583]"
-                    />
-                    Reference data
-                  </span>
-                </div>
-
-                <label
-                  htmlFor="send-amount"
-                  className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#A7AFBF]"
-                >
-                  You send
-                </label>
-
-                <div className="grid gap-3 border border-[#252D3A] bg-[#0A0F17] p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,210px)] sm:items-center sm:p-4">
-                  <input
-                    id="send-amount"
-                    type="number"
-                    min="0"
-                    step="any"
-                    inputMode="decimal"
-                    value={amount}
-                    onChange={(event) =>
-                      setAmount(event.target.value)
-                    }
-                    className={`${focusRing} min-h-12 w-full min-w-0 bg-transparent text-2xl font-semibold tracking-tight text-[#F5F5F5] outline-none placeholder:text-[#737B89] sm:text-3xl`}
-                    placeholder="Enter amount"
-                  />
-
-                  <CurrencySelect
-                    label="Currency you send"
-                    value={base}
-                    onChange={setBase}
-                  />
-                </div>
-
-                <div className="relative my-4 flex items-center justify-center">
-                  <div
-                    aria-hidden="true"
-                    className="absolute w-full border-t border-[#252D3A]"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={swap}
-                    aria-label="Swap send and receive currencies"
-                    title="Swap currencies"
-                    className={`${buttonBase} relative grid h-10 w-10 place-items-center border border-[#A85F08] bg-[#0A0F17] text-xl text-[#FFB52A] hover:border-[#FFB52A] hover:bg-[#FFB52A]/10`}
-                  >
-                    ⇅
-                  </button>
-                </div>
-
-                <label
-                  htmlFor="receive-amount"
-                  className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#A7AFBF]"
-                >
-                  You receive
-                </label>
-
-                <div className="grid gap-3 border border-[#A85F08]/70 bg-[#FFB52A]/[0.035] p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,210px)] sm:items-center sm:p-4">
-                  <div
-                    id="receive-amount"
-                    aria-live="polite"
-                    aria-atomic="true"
-                    className="flex min-h-12 min-w-0 items-center break-words text-2xl font-semibold tracking-tight text-[#FFB52A] sm:text-3xl"
-                  >
-                    {amount.trim() === "" ||
-                    !Number.isFinite(numericAmount)
-                      ? "Enter an amount"
-                      : converted == null
-                        ? loading
-                          ? "Loading rate…"
-                          : "Rate unavailable"
-                        : formatNumber(converted, 4)}
-                  </div>
-
-                  <CurrencySelect
-                    label="Currency you receive"
-                    value={quote}
-                    onChange={setQuote}
-                  />
-                </div>
-
-                <div className="mt-5 flex flex-col gap-3 border-b border-[#252D3A] pb-5 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-xs leading-5 text-[#A7AFBF]">
-                    {base === quote
-                      ? "Both currencies are the same."
-                      : rate == null
-                        ? "Exchange rate unavailable."
-                        : `1 ${base} = ${formatNumber(
-                            rate,
-                            6,
-                          )} ${quote}`}
+            {/* Currency converter */}
+            <section
+              id="currency-converter"
+              className={`${panelClass} scroll-mt-24 p-4 sm:p-6 lg:p-7`}
+            >
+              <div className="mb-7 flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[#FFB52A]">
+                    Currency tools
                   </p>
 
-                  <button
-                    type="button"
-                    onClick={() => setDialog("convert")}
-                    className={`${buttonBase} self-start text-xs font-semibold text-[#FFB52A] hover:text-[#F59A16] sm:self-auto`}
-                  >
-                    Conversion details <span aria-hidden="true">↗</span>
-                  </button>
+                  <h2 className="mt-2 font-serif text-2xl tracking-tight text-[#F5F5F5] sm:text-3xl">
+                    Currency converter
+                  </h2>
+
+                  <p className="mt-2 text-xs leading-5 text-[#A7AFBF]">
+                    Estimate a conversion using the current
+                    reference-rate snapshot.
+                  </p>
                 </div>
 
-                <div className="mt-4 flex items-start gap-3">
+                <span className="inline-flex min-h-7 items-center gap-2 border border-[#32D583]/20 px-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-[#32D583]">
                   <span
                     aria-hidden="true"
-                    className="mt-0.5 text-sm text-[#FFB52A]"
-                  >
-                    ⓘ
-                  </span>
+                    className="h-1.5 w-1.5 rounded-full bg-[#32D583]"
+                  />
+                  Reference data
+                </span>
+              </div>
 
-                  <p className="text-[11px] leading-5 text-[#A7AFBF]">
-                    Indicative mid-market conversion only.
-                    Banks and exchange providers may apply fees
-                    and different buy or sell rates. This is not
-                    an executable exchange quote.
-                  </p>
-                </div>
-              </section>
+              <label
+                htmlFor="send-amount"
+                className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#A7AFBF]"
+              >
+                You send
+              </label>
 
-              {/* Illustrative chart */}
-              <section className={`${panelClass} p-4 sm:p-6`}>
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[#FFB52A]">
-                      Market overview
-                    </p>
+              <div className="grid gap-3 border border-[#252D3A] bg-[#0A0F17] p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,210px)] sm:items-center sm:p-4">
+                <input
+                  id="send-amount"
+                  type="number"
+                  min="0"
+                  step="any"
+                  inputMode="decimal"
+                  value={amount}
+                  onChange={(event) =>
+                    setAmount(event.target.value)
+                  }
+                  className={`${focusRing} min-h-12 w-full min-w-0 bg-transparent text-2xl font-semibold tracking-tight text-[#F5F5F5] outline-none placeholder:text-[#737B89] sm:text-3xl`}
+                  placeholder="Enter amount"
+                />
 
-                    <h2 className="mt-2 font-serif text-xl text-[#F5F5F5] sm:text-2xl">
-                      Currency market pulse
-                    </h2>
+                <CurrencySelect
+                  label="Currency you send"
+                  value={base}
+                  onChange={setBase}
+                />
+              </div>
 
-                    <p className="mt-2 text-xs leading-5 text-[#A7AFBF]">
-                      Reference rates against {base}
-                    </p>
-                  </div>
+              <div className="relative my-4 flex items-center justify-center">
+                <div
+                  aria-hidden="true"
+                  className="absolute w-full border-t border-[#252D3A]"
+                />
 
-                  <div
-                    aria-label="Illustrative chart period"
-                    className="flex border border-[#252D3A] p-0.5"
-                  >
-                    {["1D", "1W", "1M", "1Y"].map((p) => (
-                      <button
-                        type="button"
-                        key={p}
-                        onClick={() => setPeriod(p)}
-                        aria-pressed={period === p}
-                        className={`${buttonBase} min-h-8 min-w-9 px-2 text-[10px] ${
-                          period === p
-                            ? "bg-[#FFB52A] font-semibold text-[#050505]"
-                            : "text-[#A7AFBF] hover:text-[#F5F5F5]"
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <button
+                  type="button"
+                  onClick={swap}
+                  aria-label="Swap send and receive currencies"
+                  title="Swap currencies"
+                  className={`${buttonBase} relative grid h-10 w-10 place-items-center border border-[#A85F08] bg-[#0A0F17] text-xl text-[#FFB52A] hover:border-[#FFB52A] hover:bg-[#FFB52A]/10`}
+                >
+                  ⇅
+                </button>
+              </div>
 
-                <div className="relative mt-6 h-[180px] overflow-hidden border border-[#252D3A] bg-[#0A0F17] sm:h-[210px]">
-                  <svg
-                    viewBox="0 0 600 180"
-                    preserveAspectRatio="none"
-                    className="h-full w-full"
-                    role="img"
-                    aria-label="Illustrative rising line, not historical exchange-rate data"
-                  >
-                    {[35, 75, 115, 155].map((y) => (
-                      <line
-                        key={y}
-                        x1="0"
-                        y1={y}
-                        x2="600"
-                        y2={y}
-                        stroke="#252D3A"
-                        strokeDasharray="4 5"
-                      />
-                    ))}
+              <label
+                htmlFor="receive-amount"
+                className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#A7AFBF]"
+              >
+                You receive
+              </label>
 
-                    <path
-                      d="M0 145 L35 130 L68 137 L100 108 L133 118 L166 89 L200 100 L235 73 L270 84 L300 58 L335 70 L370 49 L405 62 L440 35 L475 45 L510 28 L545 40 L580 17 L600 23 L600 180 L0 180Z"
-                      fill="#F59A16"
-                      fillOpacity="0.07"
-                    />
-
-                    <path
-                      d="M0 145 L35 130 L68 137 L100 108 L133 118 L166 89 L200 100 L235 73 L270 84 L300 58 L335 70 L370 49 L405 62 L440 35 L475 45 L510 28 L545 40 L580 17 L600 23"
-                      fill="none"
-                      stroke="#FFB52A"
-                      strokeWidth="2"
-                      vectorEffect="non-scaling-stroke"
-                    />
-                  </svg>
-
-                  <span className="absolute bottom-3 left-3 max-w-[75%] text-[9px] leading-4 text-[#A7AFBF]">
-                    Illustrative trend · Not historical data
-                  </span>
-
-                  <span className="absolute right-3 top-3 border border-[#252D3A] bg-[#0D121B] px-2 py-1 text-[10px] text-[#FFB52A]">
-                    {period} view
-                  </span>
+              <div className="grid gap-3 border border-[#A85F08]/70 bg-[#FFB52A]/[0.035] p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,210px)] sm:items-center sm:p-4">
+                <div
+                  id="receive-amount"
+                  aria-live="polite"
+                  aria-atomic="true"
+                  className="flex min-h-12 min-w-0 items-center break-words text-2xl font-semibold tracking-tight text-[#FFB52A] sm:text-3xl"
+                >
+                  {amount.trim() === "" ||
+                  !Number.isFinite(numericAmount)
+                    ? "Enter an amount"
+                    : converted == null
+                      ? loading
+                        ? "Loading rate…"
+                        : "Rate unavailable"
+                      : formatNumber(converted, 4)}
                 </div>
 
-                <p className="mt-3 text-[10px] leading-5 text-[#737B89]">
-                  Period selection changes the display label only.
-                  Historical market data is not connected.
+                <CurrencySelect
+                  label="Currency you receive"
+                  value={quote}
+                  onChange={(value) => {
+                    setQuote(value);
+                    setSelectedCurrency(value);
+                  }}
+                />
+              </div>
+
+              <div className="mt-5 flex flex-col gap-3 border-b border-[#252D3A] pb-5 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs leading-5 text-[#A7AFBF]">
+                  {base === quote
+                    ? "Both currencies are the same."
+                    : rate == null
+                      ? "Exchange rate unavailable."
+                      : `1 ${base} = ${formatNumber(
+                          rate,
+                          6,
+                        )} ${quote}`}
                 </p>
 
-                <div className="mt-5 grid grid-cols-3 gap-2 border-t border-[#252D3A] pt-4">
-                  <div className="min-w-0">
-                    <p className="text-[9px] uppercase tracking-[0.08em] text-[#737B89]">
-                      Base
-                    </p>
-                    <p className="mt-2 truncate text-sm font-semibold text-[#F5F5F5]">
-                      {base}
-                    </p>
-                  </div>
+                <button
+                  type="button"
+                  onClick={() => setDialog("convert")}
+                  className={`${buttonBase} self-start text-xs font-semibold text-[#FFB52A] hover:text-[#F59A16] sm:self-auto`}
+                >
+                  Conversion details <span aria-hidden="true">↗</span>
+                </button>
+              </div>
 
-                  <div className="min-w-0">
-                    <p className="text-[9px] uppercase tracking-[0.08em] text-[#737B89]">
-                      Pair
-                    </p>
-                    <p className="mt-2 truncate text-sm font-semibold text-[#F5F5F5]">
-                      {base}/{quote}
-                    </p>
-                  </div>
+              <div className="mt-4 flex items-start gap-3">
+                <span
+                  aria-hidden="true"
+                  className="mt-0.5 text-sm text-[#FFB52A]"
+                >
+                  ⓘ
+                </span>
 
-                  <div className="min-w-0">
-                    <p className="text-[9px] uppercase tracking-[0.08em] text-[#737B89]">
-                      Rate
-                    </p>
-                    <p className="mt-2 truncate text-sm font-semibold text-[#FFB52A]">
-                      {rate == null
-                        ? "—"
-                        : formatNumber(rate, 4)}
-                    </p>
-                  </div>
-                </div>
-              </section>
-            </div>
+                <p className="text-[11px] leading-5 text-[#A7AFBF]">
+                  Indicative mid-market conversion only.
+                  Banks and exchange providers may apply fees
+                  and different buy or sell rates. This is not
+                  an executable exchange quote.
+                </p>
+              </div>
+            </section>
 
             {/* Currency table */}
             <section className={`${panelClass} overflow-hidden`}>
@@ -1062,38 +976,23 @@ export default function ExchangeDashboard() {
 
                   <thead className="border-b border-[#252D3A] bg-[#0A0F17] text-[#A7AFBF]">
                     <tr>
-                      <th
-                        scope="col"
-                        className="px-5 py-4 font-medium"
-                      >
+                      <th scope="col" className="px-5 py-4 font-medium">
                         Currency
                       </th>
 
-                      <th
-                        scope="col"
-                        className="px-5 py-4 font-medium"
-                      >
+                      <th scope="col" className="px-5 py-4 font-medium">
                         Code
                       </th>
 
-                      <th
-                        scope="col"
-                        className="px-5 py-4 font-medium"
-                      >
+                      <th scope="col" className="px-5 py-4 font-medium">
                         1 {base} equals
                       </th>
 
-                      <th
-                        scope="col"
-                        className="px-5 py-4 font-medium"
-                      >
+                      <th scope="col" className="px-5 py-4 font-medium">
                         Pair
                       </th>
 
-                      <th
-                        scope="col"
-                        className="px-5 py-4 text-right font-medium"
-                      >
+                      <th scope="col" className="px-5 py-4 text-right font-medium">
                         Action
                       </th>
                     </tr>
@@ -1181,7 +1080,7 @@ export default function ExchangeDashboard() {
               </div>
             </section>
 
-            {/* Footer */}
+            {/* Footer information */}
             <footer className="flex flex-col gap-3 border-t border-[#252D3A] pt-5 pb-2 text-[10px] leading-5 text-[#737B89] sm:flex-row sm:items-start sm:justify-between">
               <span>
                 © {new Date().getFullYear()} MISA NG LTD ·
@@ -1376,6 +1275,7 @@ export default function ExchangeDashboard() {
           </div>
         </div>
       )}
+
       <Footer />
     </main>
   );

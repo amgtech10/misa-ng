@@ -14,22 +14,22 @@ import { news } from "@/lib/data";
 
 const pillars = [
   {
-    number: "01",
+    number: "I.",
     title: "Curated property",
     text: "Residential, commercial and land opportunities reviewed before they reach our network.",
   },
   {
-    number: "02",
+    number: "II.",
     title: "Market intelligence",
     text: "Clear insight into property markets, finance, policy and the forces shaping real estate.",
   },
   {
-    number: "03",
+    number: "III.",
     title: "Developer access",
     text: "A structured route for developers to reach qualified buyers and serious investors.",
   },
   {
-    number: "04",
+    number: "IV.",
     title: "Investment opportunities",
     text: "Selected opportunities built around transparency, documentation and completion.",
   },
@@ -37,17 +37,17 @@ const pillars = [
 
 const developerSteps = [
   {
-    number: "01",
+    number: "I.",
     title: "Submit",
     text: "Share your development, documentation and commercial terms.",
   },
   {
-    number: "02",
+    number: "II.",
     title: "Structure",
     text: "We review the opportunity and present it professionally.",
   },
   {
-    number: "03",
+    number: "III.",
     title: "Connect",
     text: "Qualified enquiries are introduced to your team.",
   },
@@ -71,22 +71,22 @@ export default function Home() {
           <div className="grid divide-y divide-white/[0.08] md:grid-cols-2 md:divide-x md:divide-y-0 lg:grid-cols-4">
             {pillars.map((item, index) => (
               <Reveal key={item.number} delay={index * 80}>
-                <article className="group relative min-h-[260px] overflow-hidden px-6 py-11 sm:px-8 lg:px-9 lg:py-12">
+                <article className="group relative min-h-[260px] overflow-hidden px-6 py-11 sm:px-8 lg:px-9 lg:py-4">
                   <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-brand/10 opacity-0 blur-3xl transition duration-700 group-hover:opacity-100" />
 
                   <div className="relative flex items-center justify-between">
-                    <span className="font-mono text-[10px] tracking-[0.28em] text-brand">
+                    <span className="font-mono text-[10px] tracking-[0.1em] text-brand">
                       {item.number}
                     </span>
 
                     <span className="h-px w-8 bg-white/10 transition-all duration-500 group-hover:w-16 group-hover:bg-brand" />
                   </div>
 
-                  <h3 className="relative mt-12 max-w-[220px] font-serif text-[1.55rem] leading-[1.05] tracking-[-0.02em] text-white">
+                  <h3 className="relative mt-4 max-w-[220px] font-serif text-[1rem] uppercase leading-[1.05] tracking-[-0.02em] text-white">
                     {item.title}
                   </h3>
 
-                  <p className="relative mt-5 max-w-[260px] text-[13px] leading-7 text-white/45">
+                  <p className="relative mt-2 max-w-[260px] text-[13px] leading-7 text-white/45">
                     {item.text}
                   </p>
                 </article>
@@ -122,7 +122,7 @@ export default function Home() {
             {/* Vertical editorial marker */}
             <div className="absolute left-7 top-1/2 hidden -translate-y-1/2 rotate-180 lg:block">
               <span className="[writing-mode:vertical-rl] text-[9px] uppercase tracking-[0.35em] text-white/40">
-                MISA NG · Featured development
+                MISA· Featured development
               </span>
             </div>
 
@@ -131,9 +131,6 @@ export default function Home() {
               <div className="flex items-center gap-3">
                 <span className="h-px w-8 bg-brand" />
 
-                <span className="text-[9px] uppercase tracking-[0.28em] text-white/65">
-                  Selected opportunity
-                </span>
               </div>
             </div>
 
@@ -165,7 +162,7 @@ export default function Home() {
                   <span className="h-px w-10 bg-[#a86f20]" />
 
                   <p className="text-[9px] font-medium uppercase tracking-[0.3em] text-[#93611c]">
-                    Featured investment
+                    Listing
                   </p>
                 </div>
 
@@ -191,7 +188,7 @@ export default function Home() {
                     </p>
 
                     <p className="mt-2 font-serif text-xl sm:text-2xl">
-                      ₦450m
+                      ₦450m <br/> ₦500m <br/> ₦600m <br/> ₦800m
                     </p>
                   </div>
 
@@ -201,7 +198,7 @@ export default function Home() {
                     </p>
 
                     <p className="mt-2 font-serif text-xl sm:text-2xl">
-                      4 bed
+                      4 bed <br/> 6 bed <br/> Duplex <br/> Mansion
                     </p>
                   </div>
 
@@ -211,7 +208,7 @@ export default function Home() {
                     </p>
 
                     <p className="mt-2 font-serif text-xl sm:text-2xl">
-                      Abuja
+                      Abuja < br/> Lagos <br/> Accra <br/> South Africa
                     </p>
                   </div>
                 </div>
@@ -384,7 +381,7 @@ export default function Home() {
 
           {/* Gem cards */}
           <div className="gems-premium-grid">
-            <GemGrid limit={4} />
+            <GemGrid />
           </div>
 
           {/* Collection CTA */}

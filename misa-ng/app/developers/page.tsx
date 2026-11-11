@@ -1,5 +1,5 @@
 import LeadForm from '@/components/LeadForm';
-export const metadata = { title: 'Developer onboarding | MISA NG LTD' };
+export const metadata = { title: 'Developer onboarding | MISA LTD' };
 export default function Page() {
   return (
     <div className="wrap grid gap-16 py-20 lg:grid-cols-2">

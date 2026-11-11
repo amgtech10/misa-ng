@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
-import Footer from "@/components/Footer";
+
 import WhatsAppButton from "@/components/WhatsAppButton";
+import { CountryCurrencyProvider } from "@/components/CurrencyProvider";
 
 const serif = Fraunces({
   subsets: ["latin"],
@@ -18,7 +19,7 @@ const sans = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "MISA NG LTD | Property, Investment & Developer Partnerships",
+  title: "MISA. LTD | Property, Investment & Developer Partnerships",
   description:
     "Commission-based property agency in Nigeria: property listings, real estate and finance news, developer onboarding, and investment opportunities.",
 };
@@ -35,9 +36,11 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
-      <body>{children}
-  <WhatsAppButton />
-
+      <body>
+        <CountryCurrencyProvider>
+          {children}
+          <WhatsAppButton />
+        </CountryCurrencyProvider>
       </body>
     </html>
   );

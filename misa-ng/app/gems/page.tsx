@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Gem Collection | MISA NG LTD",
+  title: "Gem Collection | MISA LTD",
   description:
     "Explore an exceptional collection of diamonds, emeralds, rubies, sapphires, and other gemstones.",
 };

@@ -894,38 +894,6 @@ export default function CinematicHero() {
                   Partner with MISA
                 </button>
               </motion.div>
-
-              {/* TRUST INDICATORS */}
-
-              <motion.div
-                {...fade(0.8)}
-                className="mt-9 grid max-w-2xl grid-cols-3 border-y border-[#252D3A] py-5 sm:mt-12 sm:py-6 lg:mt-14"
-              >
-                {[
-                  ["01", "Trusted agency"],
-                  ["360°", "Property advisory"],
-                  ["100%", "Deal focused"],
-                ].map(([number, label], index) => (
-                  <div
-                    key={label}
-                    className={
-                      index === 0
-                        ? "pr-2 sm:pr-5"
-                        : index === 1
-                          ? "border-l border-[#252D3A] px-2 sm:px-5"
-                          : "border-l border-[#252D3A] pl-2 sm:pl-5"
-                    }
-                  >
-                    <p className="font-serif text-xl font-normal text-[#F5F5F5] sm:text-3xl">
-                      {number}
-                    </p>
-
-                    <p className="mt-2 text-[8px] uppercase leading-relaxed tracking-[0.08em] text-[#A7AFBF] sm:text-[9px] sm:tracking-[0.14em]">
-                      {label}
-                    </p>
-                  </div>
-                ))}
-              </motion.div>
             </div>
 
             {/* ============================================================ */}
@@ -1269,17 +1237,17 @@ export default function CinematicHero() {
                   <span className="h-2 w-2 shrink-0 rounded-full bg-[#F59A16]" />
 
                   <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#737B89]">
-                    Who we are
+                    About Us
                   </span>
                 </div>
 
                 {/* HEADING */}
 
-                <h2 className="inline-flex items-center gap-2 border-b-2 border-[#FFB52A] pb-3 font-serif text-3xl font-normal tracking-[-0.04em] text-[#050505] sm:text-4xl md:text-5xl">
+                <h2 className="inline-flex items-center border-b-2 border-[#FFB52A] pb-3 font-serif text-3xl font-normal tracking-[-0.04em] text-[#050505] sm:text-4xl md:text-5xl">
                   MISA
 
-                  <span className="text-[#A85F08]">
-                    NG
+                  <span className="text-[#FFB25A]">
+                    .
                   </span>
                 </h2>
 

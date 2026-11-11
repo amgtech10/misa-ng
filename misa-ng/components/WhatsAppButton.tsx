@@ -5,7 +5,7 @@ export default function WhatsAppButton() {
   return (
     <a
       href={getWhatsAppUrl(
-        "Hello MISA NG, I would like to enquire about your property and investment opportunities."
+        "Hello MISA LTD, I would like to enquire about your property and investment opportunities."
       )}
       target="_blank"
       rel="noopener noreferrer"
@@ -45,7 +45,7 @@ export default function WhatsAppButton() {
       />
 
       <span className="sr-only">
-        Chat with MISA NG LTD
+        Chat with MISA LTD
       </span>
     </a>
   );

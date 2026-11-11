@@ -294,7 +294,7 @@ export default function LeadForm({
           <div className="mt-8 h-px w-full bg-white/[0.08]" />
 
           <p className="mt-5 text-[9px] uppercase tracking-[0.2em] text-white/25">
-            MISA NG LTD · Property · Investment · Advisory
+            MISA LTD · Property · Investment · Advisory
           </p>
         </div>
       </div>

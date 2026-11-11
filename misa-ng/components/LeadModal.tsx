@@ -333,7 +333,7 @@ export default function LeadModal() {
                   />
 
                   <p className="text-[9px] font-medium uppercase tracking-[0.28em] text-[#FFB52A]">
-                    MISA NG · Private client desk
+                    MISA · Private client desk
                   </p>
                 </div>
 
@@ -629,7 +629,7 @@ export default function LeadModal() {
         {/* Footer */}
         <div className="border-t border-white/[0.08] px-5 py-4 sm:px-8 md:px-10">
           <div className="flex items-center justify-between gap-3 text-[8px] uppercase tracking-[0.18em] text-white/25">
-            <span>MISA NG LTD</span>
+            <span>MISA LTD</span>
 
             <span className="hidden sm:block">
               Property · Investment · Advisory

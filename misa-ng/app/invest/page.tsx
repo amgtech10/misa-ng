@@ -1,15 +1,31 @@
 "use client";
 
 import Link from "next/link";
+
 import {
+  useMemo,
   useState,
   type CSSProperties,
   type FormEvent,
   type ReactNode,
 } from "react";
+
 import { sendLead } from "@/lib/lead";
+
+import {
+  COUNTRIES,
+  convertCurrency,
+  formatCurrency,
+} from "@/lib/currency";
+
+import { useCountryCurrency } from "@/components/CurrencyProvider";
+
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+
+/* =========================================================
+   BRAND COLORS
+========================================================= */
 
 const COLORS = {
   background: "#050505",
@@ -25,7 +41,11 @@ const COLORS = {
   success: "#32D583",
 } as const;
 
-const COUNTRIES = [
+/* =========================================================
+   PHONE COUNTRIES
+========================================================= */
+
+const PHONE_COUNTRIES = [
   {
     name: "Nigeria",
     code: "+234",
@@ -39,27 +59,68 @@ const COUNTRIES = [
     iso: "GH",
   },
   {
-    name: "Kenya - Coming soon",
+    name: "Kenya",
     code: "+254",
     flag: "🇰🇪",
     iso: "KE",
   },
   {
-    name: "South Africa - Coming soon",
+    name: "South Africa",
     code: "+27",
     flag: "🇿🇦",
     iso: "ZA",
   },
 ];
 
-const BUDGETS = [
-  "Below ₦25 million",
-  "₦25m – ₦50m",
-  "₦50m – ₦100m",
-  "₦100m – ₦250m",
-  "₦250m – ₦500m",
-  "₦500m+",
-];
+/* =========================================================
+   INVESTMENT COUNTRIES
+
+   Uses the central country configuration from lib/currency.ts.
+========================================================= */
+
+const INVESTMENT_COUNTRIES = COUNTRIES.filter((country) =>
+  ["NG", "GH", "KE", "ZA"].includes(country.code),
+);
+
+/* =========================================================
+   BASE INVESTMENT BUDGETS
+
+   All thresholds are maintained in NGN.
+
+   They are converted dynamically into the investor's
+   selected country's currency.
+========================================================= */
+
+const BUDGET_BRACKETS = [
+  {
+    min: null,
+    max: 25_000_000,
+  },
+  {
+    min: 25_000_000,
+    max: 50_000_000,
+  },
+  {
+    min: 50_000_000,
+    max: 100_000_000,
+  },
+  {
+    min: 100_000_000,
+    max: 250_000_000,
+  },
+  {
+    min: 250_000_000,
+    max: 500_000_000,
+  },
+  {
+    min: 500_000_000,
+    max: null,
+  },
+] as const;
+
+/* =========================================================
+   FORM OPTIONS
+========================================================= */
 
 const TIMELINES = [
   "Immediately",
@@ -93,6 +154,10 @@ const OPTIONAL_SERVICES = [
   "Relocation assistance",
   "Investment advisory",
 ];
+
+/* =========================================================
+   FORM TYPE
+========================================================= */
 
 type InvestmentForm = {
   investorType: "individual" | "business";
@@ -132,11 +197,19 @@ const INITIAL_FORM: InvestmentForm = {
   privatePortal: false,
 };
 
+/* =========================================================
+   INPUT STYLES
+========================================================= */
+
 const inputClass =
   "min-h-[52px] w-full border border-[#252D3A] bg-[#050505] px-4 py-3 text-sm text-[#F5F5F5] outline-none placeholder:text-[#737B89] transition-colors duration-200 focus-visible:border-[#FFB52A] focus-visible:ring-1 focus-visible:ring-[#FFB52A] motion-reduce:transition-none";
 
 const selectClass =
   "min-h-[52px] w-full cursor-pointer border border-[#252D3A] bg-[#050505] px-4 py-3 text-sm text-[#F5F5F5] outline-none transition-colors duration-200 focus-visible:border-[#FFB52A] focus-visible:ring-1 focus-visible:ring-[#FFB52A] motion-reduce:transition-none";
+
+/* =========================================================
+   INVEST PAGE
+========================================================= */
 
 export default function InvestPage() {
   const [form, setForm] = useState<InvestmentForm>(INITIAL_FORM);
@@ -147,9 +220,115 @@ export default function InvestPage() {
 
   const [errorMessage, setErrorMessage] = useState("");
 
+  /* =======================================================
+     EXISTING CURRENCY PROVIDER
+
+     We use its exchange rates without changing the
+     visitor's global website currency preference.
+  ======================================================= */
+
+  const {
+    rates,
+    loading: ratesLoading,
+    error: ratesError,
+  } = useCountryCurrency();
+
+  /* =======================================================
+     PHONE COUNTRY
+  ======================================================= */
+
   const selectedPhoneCountry =
-    COUNTRIES.find((country) => country.iso === form.phoneCountry) ??
-    COUNTRIES[0];
+    PHONE_COUNTRIES.find(
+      (country) => country.iso === form.phoneCountry,
+    ) ?? PHONE_COUNTRIES[0];
+
+  /* =======================================================
+     SELECTED INVESTMENT COUNTRY
+  ======================================================= */
+
+  const selectedInvestmentCountry = INVESTMENT_COUNTRIES.find(
+    (country) => country.name === form.preferredLocation,
+  );
+
+  const investmentCurrency =
+    selectedInvestmentCountry?.currency ?? "NGN";
+
+  /* =======================================================
+     DYNAMIC INVESTMENT BUDGETS
+
+     The original thresholds are NGN.
+
+     convertCurrency() converts NGN into the selected
+     investment country's currency using USD-based rates.
+
+     Example:
+
+     NGN -> USD -> GHS
+     NGN -> USD -> KES
+     NGN -> USD -> ZAR
+  ======================================================= */
+
+  const budgetOptions = useMemo(() => {
+    if (!form.preferredLocation) {
+      return [];
+    }
+
+    const formatAmount = (amount: number) => {
+      const converted = convertCurrency(
+        amount,
+        "NGN",
+        investmentCurrency,
+        rates,
+      );
+
+      if (converted === null) {
+        return null;
+      }
+
+      return formatCurrency(
+        converted,
+        investmentCurrency,
+        "en",
+      );
+    };
+
+    return BUDGET_BRACKETS.map(({ min, max }) => {
+      if (min === null && max !== null) {
+        const upper = formatAmount(max);
+
+        return upper ? `Below ${upper}` : null;
+      }
+
+      if (max === null && min !== null) {
+        const lower = formatAmount(min);
+
+        return lower ? `${lower}+` : null;
+      }
+
+      if (min !== null && max !== null) {
+        const lower = formatAmount(min);
+        const upper = formatAmount(max);
+
+        return lower && upper
+          ? `${lower} – ${upper}`
+          : null;
+      }
+
+      return null;
+    });
+  }, [
+    form.preferredLocation,
+    investmentCurrency,
+    rates,
+  ]);
+
+  const validBudgetOptions = budgetOptions.filter(
+    (option): option is string => option !== null,
+  );
+
+  /* =======================================================
+     FORM HELPERS
+  ======================================================= */
 
   function updateField<K extends keyof InvestmentForm>(
     field: K,
@@ -177,7 +356,32 @@ export default function InvestPage() {
     });
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  /* =======================================================
+     INVESTMENT COUNTRY CHANGE
+
+     Changing the country automatically changes the
+     investment currency and clears the previous budget.
+
+     The global Navbar currency remains untouched.
+  ======================================================= */
+
+  function handleInvestmentCountryChange(
+    countryName: string,
+  ) {
+    setForm((current) => ({
+      ...current,
+      preferredLocation: countryName,
+      budget: "",
+    }));
+  }
+
+  /* =======================================================
+     FORM SUBMISSION
+  ======================================================= */
+
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault();
 
     setErrorMessage("");
@@ -188,25 +392,58 @@ export default function InvestPage() {
       !form.phone.trim() ||
       !form.email.trim()
     ) {
-      setErrorMessage("Please complete all required contact details.");
-      setStatus("error");
-      return;
-    }
+      setErrorMessage(
+        "Please complete all required contact details.",
+      );
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
-      setErrorMessage("Please enter a valid email address.");
-      setStatus("error");
-      return;
-    }
-
-    if (!form.preferredLocation) {
-      setErrorMessage("Please select your preferred investment country.");
       setStatus("error");
       return;
     }
 
     if (
-      !form.budget ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        form.email.trim(),
+      )
+    ) {
+      setErrorMessage(
+        "Please enter a valid email address.",
+      );
+
+      setStatus("error");
+      return;
+    }
+
+    if (!form.preferredLocation) {
+      setErrorMessage(
+        "Please select your preferred investment country.",
+      );
+
+      setStatus("error");
+      return;
+    }
+
+    if (
+      ratesLoading ||
+      validBudgetOptions.length !== BUDGET_BRACKETS.length
+    ) {
+      setErrorMessage(
+        "Investment currency rates are not ready. Please wait for the currency conversion to complete.",
+      );
+
+      setStatus("error");
+      return;
+    }
+
+    if (!form.budget) {
+      setErrorMessage(
+        "Please select your investment budget.",
+      );
+
+      setStatus("error");
+      return;
+    }
+
+    if (
       !form.timeline ||
       form.propertyTypes.length === 0 ||
       !form.purpose
@@ -214,6 +451,7 @@ export default function InvestPage() {
       setErrorMessage(
         "Please complete your budget, timeline, property type, and investment purpose.",
       );
+
       setStatus("error");
       return;
     }
@@ -223,28 +461,50 @@ export default function InvestPage() {
     try {
       await sendLead({
         type: "Investment registration",
+
         name: `${form.firstName.trim()} ${form.lastName.trim()}`,
+
         firstName: form.firstName.trim(),
+
         lastName: form.lastName.trim(),
+
         email: form.email.trim(),
+
         phone: `${selectedPhoneCountry.code} ${form.phone.trim()}`,
+
         phoneCountry: selectedPhoneCountry.name,
+
         preferredLocation: form.preferredLocation,
+
         investorType: form.investorType,
+
         budget: form.budget,
+
+        budgetCurrency: investmentCurrency,
+
         timeline: form.timeline,
+
         propertyTypes: form.propertyTypes.join(", "),
+
         purpose: form.purpose,
+
         viewingPreference: form.viewingPreference,
+
         services: form.services.join(", "),
+
         note: form.note.trim(),
+
         contactTime: form.contactTime,
+
         privatePortal: form.privatePortal ? "Yes" : "No",
       });
 
       setStatus("success");
     } catch (error) {
-      console.error("Investment registration failed:", error);
+      console.error(
+        "Investment registration failed:",
+        error,
+      );
 
       setErrorMessage(
         "We couldn't submit your registration. Please try again.",
@@ -253,6 +513,10 @@ export default function InvestPage() {
       setStatus("error");
     }
   }
+
+  /* =======================================================
+     PAGE RENDER
+  ======================================================= */
 
   return (
     <main
@@ -266,7 +530,9 @@ export default function InvestPage() {
     >
       <Navbar />
 
-      {/* BACKGROUND ATMOSPHERE */}
+      {/* =================================================
+          BACKGROUND ATMOSPHERE
+      ================================================= */}
 
       <div
         aria-hidden="true"
@@ -279,7 +545,9 @@ export default function InvestPage() {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(245,245,245,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(245,245,245,0.018)_1px,transparent_1px)] bg-[size:64px_64px] opacity-25 sm:bg-[size:72px_72px]" />
       </div>
 
-      {/* PAGE INTRODUCTION */}
+      {/* =================================================
+          PAGE INTRODUCTION
+      ================================================= */}
 
       <section
         aria-labelledby="investment-heading"
@@ -312,9 +580,10 @@ export default function InvestPage() {
           </h1>
 
           <p className="mt-6 max-w-xl text-[13px] leading-7 text-[#A7AFBF] sm:mt-8 sm:text-base sm:leading-8">
-            Tell us what you are looking for. We will use your brief to
-            understand your priorities and help identify relevant property
-            opportunities across our selected markets.
+            Tell us what you are looking for. We will use your
+            brief to understand your priorities and help identify
+            relevant property opportunities across our selected
+            markets.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-[#252D3A] pt-5 sm:mt-10 sm:gap-x-8 sm:pt-6">
@@ -325,7 +594,9 @@ export default function InvestPage() {
         </div>
       </section>
 
-      {/* REGISTRATION FORM */}
+      {/* =================================================
+          REGISTRATION FORM
+      ================================================= */}
 
       <section
         aria-label="Investment registration form"
@@ -351,9 +622,9 @@ export default function InvestPage() {
               </h2>
 
               <p className="mt-5 max-w-lg text-sm leading-7 text-[#A7AFBF]">
-                Your investment brief has been submitted. Our team can
-                review your preferences and follow up using the contact
-                information you provided.
+                Your investment brief has been submitted. Our
+                team can review your preferences and follow up
+                using the contact information you provided.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 min-[420px]:flex-row">
@@ -402,6 +673,7 @@ export default function InvestPage() {
               </div>
 
               <div className="space-y-10 px-5 py-8 sm:space-y-12 sm:px-8 sm:py-10 md:px-9">
+
                 {/* 01 — INVESTOR PROFILE */}
 
                 <FormSection
@@ -410,7 +682,9 @@ export default function InvestPage() {
                   description="Tell us how you intend to invest."
                 >
                   <fieldset>
-                    <legend className="sr-only">Investor type</legend>
+                    <legend className="sr-only">
+                      Investor type
+                    </legend>
 
                     <div className="grid gap-3 sm:grid-cols-2">
                       <ChoiceCard
@@ -522,8 +796,11 @@ export default function InvestPage() {
                           }
                           className="max-w-[125px] shrink-0 cursor-pointer border-r border-[#252D3A] bg-[#0D121B] px-2 text-xs text-[#F5F5F5] outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-[#FFB52A] sm:max-w-[135px] sm:px-3"
                         >
-                          {COUNTRIES.map((country) => (
-                            <option key={country.iso} value={country.iso}>
+                          {PHONE_COUNTRIES.map((country) => (
+                            <option
+                              key={country.iso}
+                              value={country.iso}
+                            >
                               {country.flag} {country.code}
                             </option>
                           ))}
@@ -556,6 +833,9 @@ export default function InvestPage() {
                   description="Help us understand the opportunity you have in mind."
                 >
                   <div className="space-y-7">
+
+                    {/* INVESTMENT COUNTRY */}
+
                     <Field
                       id="preferredLocation"
                       label="Preferred investment country"
@@ -566,7 +846,9 @@ export default function InvestPage() {
                         name="preferredLocation"
                         value={form.preferredLocation}
                         onChange={(event) =>
-                          updateField("preferredLocation", event.target.value)
+                          handleInvestmentCountryChange(
+                            event.target.value,
+                          )
                         }
                         required
                         className={selectClass}
@@ -575,26 +857,99 @@ export default function InvestPage() {
                           Select a country
                         </option>
 
-                        {COUNTRIES.map((country) => (
-                          <option key={country.iso} value={country.name}>
+                        {INVESTMENT_COUNTRIES.map((country) => (
+                          <option
+                            key={country.code}
+                            value={country.name}
+                          >
                             {country.flag} {country.name}
                           </option>
                         ))}
                       </select>
+
+                      {/* DYNAMIC CURRENCY INDICATOR */}
+
+                      {selectedInvestmentCountry && (
+                        <div
+                          aria-live="polite"
+                          className="mt-3 flex flex-wrap items-center justify-between gap-3 border border-[#252D3A] bg-[#050505] px-4 py-3"
+                        >
+                          <div>
+                            <p className="text-[9px] uppercase tracking-[0.15em] text-[#737B89]">
+                              Investment currency
+                            </p>
+
+                            <p className="mt-1 text-sm font-medium text-[#FFB52A]">
+                              {selectedInvestmentCountry.flag}{" "}
+                              {selectedInvestmentCountry.currency}
+                              {" · "}
+                              {selectedInvestmentCountry.symbol}
+                            </p>
+                          </div>
+
+                          <span className="inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.1em] text-[#32D583]">
+                            <span className="h-1.5 w-1.5 rounded-full bg-[#32D583]" />
+
+                            Auto synchronized
+                          </span>
+                        </div>
+                      )}
                     </Field>
+
+                    {/* INVESTMENT BUDGET */}
 
                     <Field
                       id="budget"
                       label="Investment budget"
                       required
                     >
-                      <ChoiceGroup
-                        name="budget"
-                        options={BUDGETS}
-                        value={form.budget}
-                        onChange={(value) => updateField("budget", value)}
-                      />
+                      {!form.preferredLocation ? (
+                        <div className="border border-[#252D3A] bg-[#050505] px-4 py-5 text-xs leading-6 text-[#737B89]">
+                          Select your preferred investment country
+                          to view investment budgets in its local
+                          currency.
+                        </div>
+                      ) : ratesLoading ? (
+                        <div
+                          role="status"
+                          className="border border-[#252D3A] bg-[#050505] px-4 py-5 text-xs text-[#A7AFBF]"
+                        >
+                          Synchronising currency and exchange rates...
+                        </div>
+                      ) : validBudgetOptions.length ===
+                        BUDGET_BRACKETS.length ? (
+                        <ChoiceGroup
+                          name="budget"
+                          options={validBudgetOptions}
+                          value={form.budget}
+                          onChange={(value) =>
+                            updateField("budget", value)
+                          }
+                        />
+                      ) : (
+                        <div
+                          role="alert"
+                          className="border border-[#F59A16]/40 bg-[#F59A16]/[0.06] px-4 py-5 text-xs leading-6 text-[#A7AFBF]"
+                        >
+                          {ratesError
+                            ? "Exchange rates are currently unavailable. Please refresh the page and try again."
+                            : "Unable to retrieve the required exchange rates. Please try again later."}
+                        </div>
+                      )}
+
+                      {form.preferredLocation &&
+                        validBudgetOptions.length ===
+                          BUDGET_BRACKETS.length && (
+                          <p className="mt-3 text-[10px] leading-5 text-[#737B89]">
+                            Budget brackets are automatically
+                            converted from MISA's standard
+                            NGN investment thresholds using
+                            the available exchange rates.
+                          </p>
+                        )}
                     </Field>
+
+                    {/* TIMELINE */}
 
                     <Field
                       id="timeline"
@@ -605,9 +960,13 @@ export default function InvestPage() {
                         name="timeline"
                         options={TIMELINES}
                         value={form.timeline}
-                        onChange={(value) => updateField("timeline", value)}
+                        onChange={(value) =>
+                          updateField("timeline", value)
+                        }
                       />
                     </Field>
+
+                    {/* PROPERTY TYPES */}
 
                     <Field
                       id="propertyTypes"
@@ -629,6 +988,8 @@ export default function InvestPage() {
                       </p>
                     </Field>
 
+                    {/* INVESTMENT PURPOSE */}
+
                     <Field
                       id="purpose"
                       label="Primary investment objective"
@@ -638,9 +999,13 @@ export default function InvestPage() {
                         name="purpose"
                         options={INVESTMENT_PURPOSES}
                         value={form.purpose}
-                        onChange={(value) => updateField("purpose", value)}
+                        onChange={(value) =>
+                          updateField("purpose", value)
+                        }
                       />
                     </Field>
+
+                    {/* VIEWING PREFERENCE */}
 
                     <Field
                       id="viewingPreference"
@@ -648,7 +1013,10 @@ export default function InvestPage() {
                     >
                       <ChoiceGroup
                         name="viewingPreference"
-                        options={["Arrange a viewing", "Just exploring"]}
+                        options={[
+                          "Arrange a viewing",
+                          "Just exploring",
+                        ]}
                         value={form.viewingPreference}
                         onChange={(value) =>
                           updateField("viewingPreference", value)
@@ -666,46 +1034,61 @@ export default function InvestPage() {
                   description="Optional details that help us personalise your experience."
                 >
                   <div className="space-y-7">
+
+                    {/* OPTIONAL SERVICES */}
+
                     <fieldset>
                       <legend className="mb-3 text-[10px] font-medium uppercase tracking-[0.14em] text-[#A7AFBF]">
                         Services you may need
                       </legend>
 
                       <div className="grid gap-2 sm:grid-cols-2">
-                        {OPTIONAL_SERVICES.map((service, index) => {
-                          const checked = form.services.includes(service);
-                          const id = `service-${index}`;
+                        {OPTIONAL_SERVICES.map(
+                          (service, index) => {
+                            const checked =
+                              form.services.includes(service);
 
-                          return (
-                            <label
-                              key={service}
-                              htmlFor={id}
-                              className={`flex min-h-[49px] cursor-pointer items-start gap-3 border p-3.5 transition-colors duration-200 motion-reduce:transition-none ${
-                                checked
-                                  ? "border-[#FFB52A]/50 bg-[#FFB52A]/[0.06]"
-                                  : "border-[#252D3A] bg-[#050505] hover:border-[#737B89]"
-                              }`}
-                            >
-                              <input
-                                id={id}
-                                type="checkbox"
-                                checked={checked}
-                                onChange={() =>
-                                  toggleArrayValue("services", service)
-                                }
-                                className="mt-0.5 h-4 w-4 shrink-0 accent-[#FFB52A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFB52A]"
-                              />
+                            const id = `service-${index}`;
 
-                              <span className="text-xs leading-5 text-[#A7AFBF]">
-                                {service}
-                              </span>
-                            </label>
-                          );
-                        })}
+                            return (
+                              <label
+                                key={service}
+                                htmlFor={id}
+                                className={`flex min-h-[49px] cursor-pointer items-start gap-3 border p-3.5 transition-colors duration-200 motion-reduce:transition-none ${
+                                  checked
+                                    ? "border-[#FFB52A]/50 bg-[#FFB52A]/[0.06]"
+                                    : "border-[#252D3A] bg-[#050505] hover:border-[#737B89]"
+                                }`}
+                              >
+                                <input
+                                  id={id}
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={() =>
+                                    toggleArrayValue(
+                                      "services",
+                                      service,
+                                    )
+                                  }
+                                  className="mt-0.5 h-4 w-4 shrink-0 accent-[#FFB52A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFB52A]"
+                                />
+
+                                <span className="text-xs leading-5 text-[#A7AFBF]">
+                                  {service}
+                                </span>
+                              </label>
+                            );
+                          },
+                        )}
                       </div>
                     </fieldset>
 
-                    <Field id="note" label="Tell us more (optional)">
+                    {/* NOTES */}
+
+                    <Field
+                      id="note"
+                      label="Tell us more (optional)"
+                    >
                       <textarea
                         id="note"
                         name="note"
@@ -727,6 +1110,8 @@ export default function InvestPage() {
                       </p>
                     </Field>
 
+                    {/* CONTACT TIME */}
+
                     <Field
                       id="contactTime"
                       label="Preferred contact time"
@@ -747,6 +1132,8 @@ export default function InvestPage() {
                       </select>
                     </Field>
 
+                    {/* PRIVATE CLIENT PORTAL */}
+
                     <label
                       htmlFor="privatePortal"
                       className="flex cursor-pointer items-start gap-3 border border-[#252D3A] bg-[#050505] p-4 transition-colors hover:border-[#737B89] motion-reduce:transition-none"
@@ -757,7 +1144,10 @@ export default function InvestPage() {
                         type="checkbox"
                         checked={form.privatePortal}
                         onChange={(event) =>
-                          updateField("privatePortal", event.target.checked)
+                          updateField(
+                            "privatePortal",
+                            event.target.checked,
+                          )
                         }
                         className="mt-1 h-4 w-4 shrink-0 accent-[#FFB52A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFB52A]"
                       />
@@ -768,8 +1158,8 @@ export default function InvestPage() {
                         </span>
 
                         <span className="mt-1 block text-[11px] leading-5 text-[#737B89]">
-                          Receive information about a more personalised way
-                          to review relevant property opportunities.
+                          Receive information about a more personalised
+                          way to review relevant property opportunities.
                         </span>
                       </span>
                     </label>
@@ -793,7 +1183,13 @@ export default function InvestPage() {
                 <div className="border-t border-[#252D3A] pt-7">
                   <button
                     type="submit"
-                    disabled={status === "submitting"}
+                    disabled={
+                      status === "submitting" ||
+                      ratesLoading ||
+                      (Boolean(form.preferredLocation) &&
+                        validBudgetOptions.length !==
+                          BUDGET_BRACKETS.length)
+                    }
                     className="group flex min-h-[56px] w-full items-center justify-between gap-4 bg-[#FFB52A] px-5 py-4 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-[#050505] transition-colors duration-200 hover:bg-[#F59A16] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFB52A] disabled:cursor-wait disabled:opacity-60 motion-reduce:transition-none sm:px-7 sm:tracking-[0.16em]"
                   >
                     <span>
@@ -811,10 +1207,11 @@ export default function InvestPage() {
                   </button>
 
                   <p className="mt-4 text-center text-[10px] leading-5 text-[#737B89]">
-                    By submitting this form, you agree that MISA may use
-                    the details provided to respond to your enquiry.
-                    Submission does not constitute an investment commitment
-                    or guarantee of property availability.
+                    By submitting this form, you agree that
+                    MISA may use the details provided to respond
+                    to your enquiry. Submission does not
+                    constitute an investment commitment or
+                    guarantee of property availability.
                   </p>
 
                   <p
@@ -833,12 +1230,14 @@ export default function InvestPage() {
         </div>
       </section>
 
-      {/* FOOTER */}
+      {/* =================================================
+          FOOTER
+      ================================================= */}
 
       <footer className="relative z-10 border-t border-[#252D3A]">
         <div className="mx-auto flex max-w-[1200px] flex-col gap-3 px-5 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
           <p className="text-[9px] uppercase tracking-[0.15em] text-[#737B89]">
-            © {new Date().getFullYear()} MISA NG LTD
+            © {new Date().getFullYear()} MISA LTD
           </p>
 
           <p className="text-[9px] uppercase tracking-[0.15em] text-[#737B89]">
@@ -853,6 +1252,7 @@ export default function InvestPage() {
           </Link>
         </div>
       </footer>
+
       <Footer />
     </main>
   );
@@ -862,7 +1262,11 @@ export default function InvestPage() {
    REUSABLE COMPONENTS
 ========================================================= */
 
-function TrustPoint({ children }: { children: ReactNode }) {
+function TrustPoint({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
     <span className="inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.1em] text-[#A7AFBF] sm:tracking-[0.12em]">
       <span
@@ -874,6 +1278,10 @@ function TrustPoint({ children }: { children: ReactNode }) {
     </span>
   );
 }
+
+/* =========================================================
+   FORM SECTION
+========================================================= */
 
 function FormSection({
   number,
@@ -910,10 +1318,16 @@ function FormSection({
         </div>
       </div>
 
-      <div className="min-w-0 sm:pl-9">{children}</div>
+      <div className="min-w-0 sm:pl-9">
+        {children}
+      </div>
     </section>
   );
 }
+
+/* =========================================================
+   FORM FIELD
+========================================================= */
 
 function Field({
   id,
@@ -935,7 +1349,10 @@ function Field({
         {label}
 
         {required && (
-          <span className="ml-1 text-[#FFB52A]" aria-hidden="true">
+          <span
+            className="ml-1 text-[#FFB52A]"
+            aria-hidden="true"
+          >
             *
           </span>
         )}
@@ -945,6 +1362,10 @@ function Field({
     </div>
   );
 }
+
+/* =========================================================
+   INVESTOR TYPE CARD
+========================================================= */
 
 function ChoiceCard({
   selected,
@@ -971,7 +1392,9 @@ function ChoiceCard({
       <span
         aria-hidden="true"
         className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
-          selected ? "border-[#FFB52A]" : "border-[#737B89]"
+          selected
+            ? "border-[#FFB52A]"
+            : "border-[#737B89]"
         }`}
       >
         {selected && (
@@ -991,6 +1414,10 @@ function ChoiceCard({
     </button>
   );
 }
+
+/* =========================================================
+   CHOICE GROUP
+========================================================= */
 
 function ChoiceGroup({
   name,
@@ -1013,7 +1440,7 @@ function ChoiceGroup({
       aria-label={name}
       className="grid grid-cols-1 gap-2 sm:grid-cols-2"
     >
-      {options.map((option, index) => {
+      {options.map((option) => {
         const selected = isArray
           ? value.includes(option)
           : value === option;
@@ -1042,15 +1469,18 @@ function ChoiceGroup({
               }`}
             >
               {selected && (
-                <span className="text-[10px] font-bold">✓</span>
+                <span className="text-[10px] font-bold">
+                  ✓
+                </span>
               )}
             </span>
 
-            <span className="min-w-0">{option}</span>
+            <span className="min-w-0">
+              {option}
+            </span>
           </button>
         );
       })}
-
     </div>
   );
 }

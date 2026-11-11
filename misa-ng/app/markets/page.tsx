@@ -1083,7 +1083,7 @@ export default function ExchangeDashboard() {
             {/* Footer information */}
             <footer className="flex flex-col gap-3 border-t border-[#252D3A] pt-5 pb-2 text-[10px] leading-5 text-[#737B89] sm:flex-row sm:items-start sm:justify-between">
               <span>
-                © {new Date().getFullYear()} MISA NG LTD ·
+                © {new Date().getFullYear()} MISA LTD ·
                 Currency information
               </span>
 

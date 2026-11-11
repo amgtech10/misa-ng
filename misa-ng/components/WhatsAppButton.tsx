@@ -9,7 +9,7 @@ export default function WhatsAppButton() {
       )}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Chat with MISA NG LTD on WhatsApp"
+      aria-label="Chat with MISA LTD on WhatsApp"
       title="Chat with us on WhatsApp"
       className="
         group fixed

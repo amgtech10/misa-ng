@@ -5,11 +5,11 @@ import Footer from "@/components/Footer";
 import PropertyGrid from "@/components/PropertyGrid";
 
 export const metadata: Metadata = {
-  title: "Properties | MISA NG LTD",
+  title: "Properties | MISA LTD",
   description:
-    "Explore curated residential, commercial and land investment opportunities across Nigeria with MISA NG LTD.",
+    "Explore curated residential, commercial and land investment opportunities across Nigeria with MISALTD.",
   openGraph: {
-    title: "Properties | MISA NG LTD",
+    title: "Properties | MISA LTD",
     description:
       "Discover selected property opportunities across Nigeria.",
     type: "website",
@@ -24,22 +24,27 @@ export default function PropertiesPage() {
       <main className="min-h-screen bg-ink">
 
         {/* HERO */}
-        <section className="relative overflow-hidden border-b border-line">
+        <section
+          className="relative mb-4 isolate overflow-hidden border-b border-line bg-cover bg-center"
+          style={{
+            backgroundImage: "url('/images/gems/house.jpeg')",
+          }}
+        >
+          {/* Dark overlay */}
+          <div className="absolute inset-0 -z-10 bg-black/50" />
 
-          {/* Background decoration */}
-          <div
-            className="pointer-events-none absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full blur-[120px]"
-            style={{
-              backgroundImage: "url('/images/house.jpg')",
-            }}
-          />
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black via-black/50 to-black/20" />
+
+          {/* Decorative glow */}
+          <div className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[500px] w-[500px] rounded-full bg-brand/10 blur-[120px]" />
 
           <div className="relative mx-auto max-w-7xl px-5 pb-16 pt-32 sm:px-8 sm:pb-20 lg:px-10 lg:pt-40">
 
             <div className="max-w-3xl">
 
               <p className="mb-5 text-[10px] font-semibold uppercase tracking-[0.35em] text-brand">
-              Property Collection
+                Property Collection
               </p>
 
               <h1 className="font-serif text-4xl leading-tight text-white sm:text-5xl lg:text-7xl">
@@ -63,12 +68,12 @@ export default function PropertiesPage() {
                   className="inline-flex items-center gap-3 bg-brand px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-ink transition hover:bg-gold"
                 >
                   Explore properties
-                  <span aria-hidden="true">↘</span>
+                  
                 </a>
 
                 <a
                   href="/#contact"
-                  className="border border-line px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:border-brand hover:text-brand"
+                  className="border border-white/20 bg-white/5 px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-white backdrop-blur-md transition hover:border-brand hover:text-brand"
                 >
                   Contact MISA
                 </a>
@@ -78,19 +83,11 @@ export default function PropertiesPage() {
             </div>
 
             {/* Bottom information */}
-            <div className="mt-16 grid grid-cols-2 gap-6 border-t border-line pt-7 sm:grid-cols-3">
+            <div className="mt-16 grid grid-cols-2 gap-4 border-t border-white/15 pt-7 sm:grid-cols-2">
 
+              
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-muted">
-                  Coverage
-                </p>
-                <p className="mt-2 text-sm text-white">
-                  Across Nigeria
-                </p>
-              </div>
-
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-muted">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#ffb25a]">
                   Property types
                 </p>
                 <p className="mt-2 text-sm text-white">
@@ -99,11 +96,11 @@ export default function PropertiesPage() {
               </div>
 
               <div className="col-span-2 sm:col-span-1">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-muted">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#ffb25a]">
                   Our approach
                 </p>
                 <p className="mt-2 text-sm text-white">
-                  Curated property opportunities
+                  Curated property listings
                 </p>
               </div>
 
@@ -111,7 +108,7 @@ export default function PropertiesPage() {
 
           </div>
         </section>
-
+<PropertyGrid/>
         {/* PROPERTY LISTINGS */}
         <section
           id="property-listings"
@@ -141,7 +138,8 @@ export default function PropertiesPage() {
 
           </div>
 
-          <PropertyGrid />
+      
+
         </section>
 
       </main>

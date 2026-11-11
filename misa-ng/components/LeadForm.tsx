@@ -286,7 +286,7 @@ export default function LeadForm({
           </h3>
 
           <p className="mt-5 max-w-lg text-sm leading-7 text-white/45">
-            Your enquiry has been received by MISA NG. A member of our
+            Your enquiry has been received by MISA. A member of our
             advisory team will review your request and contact you
             shortly.
           </p>

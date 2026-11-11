@@ -358,7 +358,7 @@ function SuccessState({
       </h2>
 
       <p className="mt-4 max-w-sm text-sm leading-7 text-[#A7AFBF]">
-        Thank you for contacting MISA NG. Our team will review
+        Thank you for contacting MISA. Our team will review
         your requirements and follow up regarding your enquiry.
       </p>
 
@@ -1175,7 +1175,7 @@ export default function CinematicHero() {
                 </div>
 
                 <p className="mt-4 text-center text-[9px] uppercase tracking-[0.12em] text-[#A7AFBF] sm:tracking-[0.16em]">
-                  Confidential enquiry · MISA NG LTD
+                  Confidential enquiry · MISA
                 </p>
               </div>
             </motion.div>

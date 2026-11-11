@@ -751,7 +751,7 @@ function SuccessState({
       </h2>
 
       <p className="mt-6 max-w-sm text-sm leading-7 text-white/45">
-        Thank you for contacting MISA NG regarding{" "}
+        Thank you for contacting MISA regarding{" "}
         <span className="text-white/80">{enquiryType}</span>. Our team will
         review your requirements and contact you about the next steps.
       </p>

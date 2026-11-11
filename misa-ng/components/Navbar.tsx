@@ -25,9 +25,9 @@ const links = [
     icon: Building2,
   },
   {
-    label: "Gems",
+    label: "Gemstones",
     href: "/gems",
-    icon: Users,
+    icon: Gem,
   },
   {
     label: "Invest",
@@ -35,18 +35,18 @@ const links = [
     icon: TrendingUp,
   },
   {
-    label: "Markets",
+    label: "Exchange",
     href: "/markets",
     icon: BarChart3,
   },
   {
-    label: "Intelligence",
+    label: "News",
     href: "#newsfeed",
     icon: Newspaper,
   },
   {
     label: "Contact",
-    href: "#contact",
+    href: "/contact",
     icon: Mail,
   },
 ];
@@ -183,21 +183,17 @@ export default function Navbar() {
           {/* BRAND */}
           <Link
             href="/"
-            aria-label="MISA NG homepage"
+            aria-label="MISA homepage"
             onClick={handleNavigation}
             className="group flex shrink-0 items-center gap-3"
           >
             <div className="flex h-10 w-10 items-center justify-center border border-[#F59A16]/40 bg-[#F59A16]/10 transition-colors group-hover:bg-[#F59A16]/20">
-              <Gem
-                size={21}
-                strokeWidth={1.5}
-                className="text-[#F59A16]"
-              />
+              M
             </div>
 
             <div className="flex flex-col">
-              <span className="text-[17px] font-bold leading-none tracking-[0.16em] text-[#F5F5F5]">
-                MISA <span className="text-[#F59A16]">NG</span>
+              <span className="text-[17px] font-bold leading-none tracking-tightest text-[#F5F5F5]">
+                MI<span className="text-[#F59A16]">SA</span>
               </span>
 
               <span className="mt-1.5 text-[8px] font-medium uppercase tracking-[0.22em] text-[#737B89]">
@@ -365,7 +361,7 @@ export default function Navbar() {
           {/* MOBILE FOOTER */}
           <div className="mt-8 flex items-center justify-between border-t border-[#252D3A] pt-5">
             <span className="text-[9px] uppercase tracking-[0.16em] text-[#737B89]">
-              MISA NG LTD
+              MISA LTD
             </span>
 
             <span className="text-[9px] uppercase tracking-[0.16em] text-[#737B89]">

@@ -30,46 +30,11 @@ export default function GemGrid() {
   }, [search, activeCategory]);
 
   return (
-    <section className="bg-[#050505] px-5 py-20 sm:px-8 lg:px-16 lg:py-28">
+    <section className="bg-[#050505] px-5 py-4 sm:px-8 lg:px-16 lg:py-28">
 
       <div className="mx-auto max-w-7xl">
 
-        {/* Header */}
-        <div className="mb-12 flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
-
-          <div className="max-w-2xl">
-
-            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-[#D6B56D]">
-              Our Collection
-            </p>
-
-            <h2 className="text-3xl font-light tracking-tight text-white sm:text-4xl lg:text-5xl">
-              Discover Our{" "}
-              <span className="font-serif italic text-[#D6B56D]">
-                Minerals
-              </span>
-            </h2>
-
-            <p className="mt-5 max-w-xl text-sm leading-7 text-gray-400">
-              Explore our carefully curated selection of precious gemstones,
-              strategic minerals and valuable natural resources.
-            </p>
-
-          </div>
-
-          {/* Collection count */}
-          <div className="border-l border-[#D6B56D]/40 pl-5">
-            <p className="text-3xl font-light text-white">
-              {String(gems.length).padStart(2, "0")}
-            </p>
-
-            <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-gray-500">
-              Featured Collections
-            </p>
-          </div>
-
-        </div>
-
+       
         {/* Filters */}
         <div className="mb-8 flex flex-col gap-5 border-b border-white/10 pb-8 md:flex-row md:items-center md:justify-between">
 
